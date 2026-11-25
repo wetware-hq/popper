@@ -18,12 +18,19 @@
     "repo": "wetware-hq/tulip",
     "commit": "a2b956086f97d547f267efa47f3efabbd48995d6",
     "licence": "MIT",
-    "role": "the writing engine popper generates conjectures with; cited and pinned, not read at run time",
+    "role": "the writing engine that generates every diff; cited and pinned, not read at run time",
     "files": {
       "docs/follow-agent-contract.md": "sha256:a944dab2353f597812b86c24f64453459216d5af9148473120100b2b5377ca50",
       "skills/substitute-lexeme.md": "sha256:d272b051fdb5dc264942d7cb942f3ad0db40d0fc0dc5d8dbccafb5aa559d9d3d",
-      "systems/compose-frame.md": "sha256:842cccfde95eb012bf06d7736e070e33fa0e1b6ed1aebccd08fb9fb6961dcbe2"
-    }
+      "skills/combine-lines.md": "sha256:0496922eb033a12e36ebb41c07d95ef7376cf84acf0c2708635c263a5b7919ff",
+      "skills/traverse-tale.md": "sha256:af6c4eb690cbe8df8035955c1b1ee734a7565a558f5e626552db131f21b9d6fa",
+      "systems/fly-autopilot.md": "sha256:eb901b7aedac78462d8d9bad3c2cf0ba543c805970f28ec7e34fd20f5dbac17d"
+    },
+    "generality": [
+      "traverse-tale",
+      "combine-lines",
+      "substitute-value"
+    ]
   },
   "testbed": {
     "id": "testbed:nanochat-5min",
@@ -97,158 +104,7 @@
     "kinds": [
       "improves",
       "simplifies"
-    ],
-    "writes": "a pick at the hinge, a claim and a prediction; never diff bytes except under verbatim"
-  },
-  "engine": {
-    "procedures": [
-      "substitute-value",
-      "verbatim"
-    ],
-    "lexicon": "train.py constants at source.commit; each ladder is the Steward's, in ascending order, and holds the pinned value",
-    "offered": "every (knob, n) with n != 0 and 0 <= index + n < |ladder| at the base, minus moves whose diff bytes equal a refuted diff; knobs in this order, n ascending",
-    "bits": "log2(|offered|), rounded to 3 decimals, for seed conjecturer; 0 for seed root; null for verbatim",
-    "seed_root": "index = int(hex(sha256(r || \"engine\"))[0:8], 16) mod |offered|, r = trace root just before the conjecture",
-    "comment_column": "kept; at least one space before #",
-    "knobs": {
-      "ASPECT_RATIO": {
-        "line": 433,
-        "text": "ASPECT_RATIO = 64       # model_dim = depth * ASPECT_RATIO",
-        "ladder": [
-          "32",
-          "48",
-          "64",
-          "96",
-          "128"
-        ]
-      },
-      "HEAD_DIM": {
-        "line": 434,
-        "text": "HEAD_DIM = 128          # target head dimension for attention",
-        "ladder": [
-          "64",
-          "128"
-        ]
-      },
-      "WINDOW_PATTERN": {
-        "line": 435,
-        "text": "WINDOW_PATTERN = \"SSSL\" # sliding window pattern: L=full, S=half context",
-        "ladder": [
-          "\"L\"",
-          "\"SL\"",
-          "\"SSL\"",
-          "\"SSSL\""
-        ]
-      },
-      "TOTAL_BATCH_SIZE": {
-        "line": 438,
-        "text": "TOTAL_BATCH_SIZE = 2**19 # ~524K tokens per optimizer step",
-        "ladder": [
-          "2**17",
-          "2**18",
-          "2**19",
-          "2**20"
-        ]
-      },
-      "EMBEDDING_LR": {
-        "line": 439,
-        "text": "EMBEDDING_LR = 0.6      # learning rate for token embeddings (Adam)",
-        "ladder": [
-          "0.2",
-          "0.4",
-          "0.6",
-          "0.8",
-          "1.0"
-        ]
-      },
-      "UNEMBEDDING_LR": {
-        "line": 440,
-        "text": "UNEMBEDDING_LR = 0.004  # learning rate for lm_head (Adam)",
-        "ladder": [
-          "0.002",
-          "0.004",
-          "0.008"
-        ]
-      },
-      "MATRIX_LR": {
-        "line": 441,
-        "text": "MATRIX_LR = 0.04        # learning rate for matrix parameters (Muon)",
-        "ladder": [
-          "0.02",
-          "0.03",
-          "0.04",
-          "0.05",
-          "0.06"
-        ]
-      },
-      "SCALAR_LR": {
-        "line": 442,
-        "text": "SCALAR_LR = 0.5         # learning rate for per-layer scalars (Adam)",
-        "ladder": [
-          "0.25",
-          "0.5",
-          "1.0"
-        ]
-      },
-      "WEIGHT_DECAY": {
-        "line": 443,
-        "text": "WEIGHT_DECAY = 0.2      # cautious weight decay for Muon",
-        "ladder": [
-          "0.0",
-          "0.1",
-          "0.2",
-          "0.3"
-        ]
-      },
-      "WARMUP_RATIO": {
-        "line": 445,
-        "text": "WARMUP_RATIO = 0.0      # fraction of time budget for LR warmup",
-        "ladder": [
-          "0.0",
-          "0.05",
-          "0.1"
-        ]
-      },
-      "WARMDOWN_RATIO": {
-        "line": 446,
-        "text": "WARMDOWN_RATIO = 0.5    # fraction of time budget for LR warmdown",
-        "ladder": [
-          "0.3",
-          "0.4",
-          "0.5",
-          "0.6",
-          "0.7"
-        ]
-      },
-      "FINAL_LR_FRAC": {
-        "line": 447,
-        "text": "FINAL_LR_FRAC = 0.0     # final LR as fraction of initial",
-        "ladder": [
-          "0.0",
-          "0.05",
-          "0.1"
-        ]
-      },
-      "DEPTH": {
-        "line": 450,
-        "text": "DEPTH = 8               # number of transformer layers",
-        "ladder": [
-          "6",
-          "8",
-          "10",
-          "12"
-        ]
-      },
-      "DEVICE_BATCH_SIZE": {
-        "line": 451,
-        "text": "DEVICE_BATCH_SIZE = 128  # per-device batch size (reduce if OOM)",
-        "ladder": [
-          "32",
-          "64",
-          "128"
-        ]
-      }
-    }
+    ]
   },
   "critic": {
     "type": "I",
@@ -293,10 +149,50 @@
   },
   "traces": {
     "traces/nov25.jsonl": {
-      "digest": "sha256:07e70bb2ce6a4dcc5795d4088407bb69da783dafaf9ae31d7ae1db2edd9b68cd",
-      "events": 41,
-      "root": "bdc8c9664224c8ff5a1dbd462f6a3f968da7450864a4c7d98fa719e2ab31f8a8",
+      "digest": "sha256:644d31216202f7a415abb8aa0681de44799063e7d0d3d0983dbac9a798b4650a",
+      "events": 50,
+      "root": "55f40d6c13415585e9e169a673f23a91123d7d4f6c1ac41abb85ae5cc7636d56",
       "illustrative": true
     }
+  },
+  "engine": {
+    "from": "wetware-hq/tulip@a2b956086f97d547f267efa47f3efabbd48995d6",
+    "skills": {
+      "substitute-value": "tulip substitute-lexeme (S+n) over train.py hyperparameter values",
+      "combine-lines": "tulip combine-lines (Queneau) over corroborated hyperparameter blocks",
+      "traverse-tale": "tulip traverse-tale over the night's base graph"
+    },
+    "lexicons": {
+      "MATRIX_LR": [
+        0.01,
+        0.02,
+        0.03,
+        0.04,
+        0.05,
+        0.06,
+        0.08
+      ],
+      "WARMDOWN_RATIO": [
+        0.3,
+        0.4,
+        0.5,
+        0.6,
+        0.7
+      ],
+      "DEPTH": [
+        4,
+        6,
+        8,
+        10,
+        12
+      ]
+    },
+    "offsets": [
+      -1,
+      1
+    ],
+    "block": "train.py hyperparameter assignments, lines 433-451 at the pin",
+    "seed": "conjecturer",
+    "picks": "the Conjecturer picks one offered option; with seed = machine, option seed(r, \"key\") mod size, r = root just after the hinge"
   }
 }

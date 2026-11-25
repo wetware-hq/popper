@@ -29,6 +29,7 @@ LOOP(data) {
 ## Graph
 
 - ← [follow-research-contract.md](follow-research-contract.md)
+- → [../skills/write-conjecture.md](../skills/write-conjecture.md)
 - → [../skills/conjecture-hypothesis.md](../skills/conjecture-hypothesis.md)
 - → [../skills/refute-experiment.md](../skills/refute-experiment.md)
 
@@ -52,6 +53,22 @@ flowchart LR
 - **Negative feedback.** The Critic rejects a change that fails its registered rule. For an improvement, one run at or above the base's minimum ends the test immediately.
 - **Second order.** The Steward sets the charter, outside both feedback loops. The Steward may amend or stop the loop, but does not propose or judge experiments.
 - **Memory.** Type I is reactive: the Critic uses only the registered test, base results and current run results to decide. Type II uses a record of past experience: the Conjecturer reads the trace, including the refuted diffs, to choose what to try next.
+
+## Generative framework: tulip's writing engine
+
+The positive loop uses the writing engine of [tulip `a2b9560`](https://github.com/wetware-hq/tulip/tree/a2b956086f97d547f267efa47f3efabbd48995d6) (`skills/write-conjecture.md`). In tulip, a person picks and a deterministic Engine writes. popper keeps that split one level inside the theory world: the Conjecturer picks, and the Engine writes every diff.
+
+| tulip | popper |
+|---|---|
+| The Reader picks at a hinge and never writes text | The Conjecturer picks at a hinge and never writes diff bytes (`not_offered`) |
+| The Engine writes text from a pinned corpus and a key, and never chooses | The Engine writes a diff from `research.json` `engine.lexicons` and a key, and never chooses (`pure_chance`) |
+| S+n shifts each noun n places along a lexicon | `substitute-value` shifts one constant n places along its lexicon |
+| Queneau's matrix takes line i from row k[i] | `combine-lines` takes constant i from corroborated block k[i] |
+| A branching tale, where 0 bits are carried by a choice between two ways that meet | The night's graph of bases, where 0 bits are carried by a choice between two options that write the same diff |
+| Bits of choice cross the Reader edge | Bits of choice cross the inner edge; bits of verdict cross the data edge; the two are never added |
+| A machine seed is a declared clinamen | A machine pick is a declared clinamen (`seed: "machine"`) |
+
+This variation changes what a refutation tells the Conjecturer. A refuted diff stays on the base's hinge as a closed edge. The next hinge offers one option fewer, and the choice's bits drop to match. So the trace records how much of the search space the negative loop has closed, not only which ideas failed.
 
 ## What popper patches in the source loop
 

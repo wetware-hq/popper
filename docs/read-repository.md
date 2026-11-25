@@ -22,7 +22,6 @@ popper is a cybernetic auto-research specbase. A Conjecturer proposes, a Critic 
 
 - → [follow-research-contract.md](follow-research-contract.md)
 - → [vary-cybernetics.md](vary-cybernetics.md)
-- → [frame-writing-engine.md](frame-writing-engine.md)
 - → [../systems/loop-research.md](../systems/loop-research.md)
 
 ## Route
@@ -32,9 +31,9 @@ Read `DISCLAIMER` first. The contract governs every route.
 | Task | Path |
 |---|---|
 | Run a whole research night under a Steward's charter | contract → `systems/loop-research.md` |
-| Propose the next hypothesis | contract → `skills/conjecture-hypothesis.md` |
-| Turn a pick into the exact diff | contract → `skills/substitute-value.md` |
-| See how tulip's writing engine generates conjectures | `docs/frame-writing-engine.md` |
+| Generate the next diff from a hinge | contract → `skills/write-conjecture.md` |
+| Choose which tulip procedure to charter, by generality | `docs/frame-writing-engine.md` |
+| Propose the next hypothesis | contract → `skills/write-conjecture.md` → `skills/conjecture-hypothesis.md` |
 | Test a registered hypothesis and give its verdict | contract → `skills/refute-experiment.md` |
 | Understand the feedback loops and what changes from autoresearch | `docs/vary-cybernetics.md` |
 | Check whether a source, shard or harness may be used | `docs/pin-sources.md` |
@@ -50,14 +49,13 @@ flowchart LR
     R --> C[follow-research-contract]
     C --> P[pin-sources]
     C --> V[vary-cybernetics]
-    V --> H[conjecture-hypothesis]
-    C --> W[frame-writing-engine]
-    W --> S[substitute-value]
-    H --> S
+    V --> W[write-conjecture]
+    C --> F[frame-writing-engine]
+    F --> W
+    W --> H[conjecture-hypothesis]
     V --> E[refute-experiment]
     P --> E
-    S --> L[loop-research]
-    H --> L
+    H --> L[loop-research]
     E --> L
 ```
 
