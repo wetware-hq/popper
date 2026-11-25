@@ -31,7 +31,7 @@ Every byte the loop runs, reads or scores against is pinned to a commit or a rev
 |---|---|---|
 | `program.md` | `86cf987a…acecce` | the loop popper forks (`docs/vary-cybernetics.md`) |
 | `prepare.py` | `4f2ba9cb…058150` | frozen: constants, data loader, `evaluate_bpb` (the data world's voice) |
-| `train.py` | `2954175f…814414` | the only file a diff may touch; seed lines 458–459 belong to the Critic |
+| `train.py` | `2954175f…814414` | the only file a diff may touch; its two seed calls (lines 458–459 at the pin) belong to the Critic |
 | `pyproject.toml` | `675c150a…f1af` | frozen: no new dependency |
 | `uv.lock` | `03174c5c…a0a3` | frozen |
 

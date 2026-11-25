@@ -42,7 +42,7 @@ output = Conjecture = {
 1. **Read the problem.** Read the charter and the current base. Read every `verdict` in the trace, and every refuted diff. A refutation says what not to try again; corroborations say where the base came from.
 2. **Choose boldly.** Prefer a conjecture that forbids more: a larger predicted `delta`, or a deletion that predicts no loss. A bold conjecture that is refuted teaches more than a timid one that survives. The choice of *what* to try is the machine's own and needs no justification beyond the claim.
 3. **Make one change.** Write a diff of `train.py` against the base that tests one idea. Two ideas in one diff cannot be told apart by a verdict.
-4. **Stay in the testbed.** The diff must not touch `prepare.py`, `pyproject.toml`, `uv.lock`, lines 458–459 of `train.py` (the seeds), `TIME_BUDGET`, `MAX_SEQ_LEN`, `EVAL_TOKENS`, or the `evaluate_bpb` call (`out_of_scope`, `confound`). It must run within the source's memory and time limits; a crash is `inconclusive`, not a refutation, but it spends one of the charter's tests.
+4. **Stay in the testbed.** The diff must not touch `prepare.py`, `pyproject.toml`, `uv.lock`, the two seed calls in `train.py` (`torch.manual_seed`, `torch.cuda.manual_seed`; lines 458–459 at the pin), `TIME_BUDGET`, `MAX_SEQ_LEN`, `EVAL_TOKENS`, or the `evaluate_bpb` call (`out_of_scope`, `confound`). It must run within the source's memory and time limits; a crash is `inconclusive`, not a refutation, but it spends one of the charter's tests.
 5. **Predict.** Set the kind and the threshold before any run.
 
     | `kind` | Prediction | `forbids` |

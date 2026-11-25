@@ -41,6 +41,7 @@
     },
     "budget_s": 300,
     "timeout_s": 600,
+    "seed_lines_note": "line numbers are at the pin; after a diff, the Critic finds both calls by pattern",
     "seed_lines": {
       "train.py:458": "torch.manual_seed(<seed>)",
       "train.py:459": "torch.cuda.manual_seed(<seed>)"

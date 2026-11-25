@@ -35,7 +35,7 @@ Nothing else. Not the claim, not the notebook, not how many conjectures came bef
 ## Running one replicate
 
 1. Check that the frozen files hash to `research.json` `source.files` and the probe shard to `data.probe.digest` (`drift`).
-2. Apply the diff to the base in a fresh commit on `popper/<tag>`. Set lines 458–459 of `train.py` to the replicate's seed, `seed(r, i)` from contract §3, where `r` is the root just after the `conjecture` event (or, for the base, just after the `charter` or `advance` that set it). This seed edit is the Critic's and is not part of the conjecture.
+2. Apply the diff to the base in a fresh commit on `popper/<tag>`. Set the arguments of the two seed calls in `train.py` (`torch.manual_seed` and `torch.cuda.manual_seed`, lines 458–459 at the pin; found by pattern, since a diff may shift them) to the replicate's seed, `seed(r, i)` from contract §3, where `r` is the root just after the `conjecture` event (or, for the base, just after the `charter` or `advance` that set it). This seed edit is the Critic's and is not part of the conjecture.
 3. Append a `run` event, then run `uv run train.py > run.log 2>&1` with a `timeout_s` kill.
 4. Read `val_bpb` and `peak_vram_mb` from `run.log`. Append a `result` event: `status: "ok"`, or `"crash"` if there is no `val_bpb:` line, or `"timeout"`. `memory_gb = peak_vram_mb / 1024`, rounded to one decimal, as in the source.
 
