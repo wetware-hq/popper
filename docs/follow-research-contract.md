@@ -14,7 +14,7 @@ popper researches at the edge between two worlds. In the theory world a machine 
   "reads": ["DISCLAIMER", "research.json", "ooc/popper.og"],
   "writes": [],
   "must": ["every advance passes through the data", "predict before running", "the Critic alone runs and judges", "only the Steward charters", "corroborated is never true", "the holdout is read once", "append only", "match codes, not prose"],
-  "check": ["R1-R13"]
+  "check": ["R1-R15"]
 }
 ```
 
@@ -23,7 +23,9 @@ popper researches at the edge between two worlds. In the theory world a machine 
 - ← [read-repository.md](read-repository.md)
 - → [pin-sources.md](pin-sources.md)
 - → [vary-cybernetics.md](vary-cybernetics.md)
+- → [frame-writing-engine.md](frame-writing-engine.md)
 - → [../skills/conjecture-hypothesis.md](../skills/conjecture-hypothesis.md)
+- → [../skills/substitute-value.md](../skills/substitute-value.md)
 - → [../skills/refute-experiment.md](../skills/refute-experiment.md)
 - → [../systems/loop-research.md](../systems/loop-research.md)
 
@@ -32,9 +34,10 @@ popper researches at the edge between two worlds. In the theory world a machine 
 ```toml { type: notebook.cell }
 config = "research.json"                 # source pin, testbed, data, critic rule, charter defaults
 index = "ooc/popper.og"                  # optional local file map
-skills = ["skills/conjecture-hypothesis.md", "skills/refute-experiment.md"]
+skills = ["skills/conjecture-hypothesis.md", "skills/substitute-value.md", "skills/refute-experiment.md"]
 system = "systems/loop-research.md"      # LOOP(data) { POSITIVE hypothesis; NEGATIVE experiments; } RETURN
 variant = "docs/vary-cybernetics.md"     # feedback and principles of refutation
+framework = "docs/frame-writing-engine.md" # tulip's writing engine as the generator
 store = "one trace per charter"          # JSON Lines, append only, root-chained (§3)
 ```
 
@@ -57,17 +60,19 @@ store = "one trace per charter"          # JSON Lines, append only, root-chained
 | Role | World | Does | Never |
 |---|---|---|---|
 | **Steward** | human | writes the charter: the problem, the testbed, `delta_min`, the budget; may stop or amend | conjectures, runs, judges, reads the holdout before RETURN |
-| **Conjecturer** | theory (positive) | proposes one hypothesis at a time: a diff and a prediction; reads the whole trace (Type II) | runs, judges, edits a registered prediction, touches a frozen file |
+| **Conjecturer** | theory (positive) | proposes one hypothesis at a time: a pick from the offered moves (or a declared `verbatim` diff) and a prediction; reads the whole trace (Type II) | runs, judges, edits a registered prediction, writes diff bytes under `substitute-value`, touches a frozen file |
+| **Engine** | theory | writes the diff of a `substitute-value` conjecture from its key and the base by a fixed rule (`skills/substitute-value.md`) | chooses, samples, writes bytes the rule does not give |
 | **Critic** | data (negative) | runs the registered test exactly: seeds, replicates, rule; emits the verdict (Type I) | reads the rationale, chooses which runs count, reruns a refuted arm |
 | **Recorder** | frame | writes notebook entries to the Steward from the trace | invents an event, calls a conjecture true |
 
-The roles are defined in `skills/conjecture-hypothesis.md`, `skills/refute-experiment.md` and `systems/loop-research.md`. Their read and write boundaries apply even if a single runner performs them. Only the human Steward writes, amends or stops a charter (`self_charter`). The pinned `prepare.py` supplies the evaluator, `evaluate_bpb`.
+The roles are defined in `skills/conjecture-hypothesis.md`, `skills/substitute-value.md`, `skills/refute-experiment.md` and `systems/loop-research.md`. Their read and write boundaries apply even if a single runner performs them. Only the human Steward writes, amends or stops a charter (`self_charter`). The pinned `prepare.py` supplies the evaluator, `evaluate_bpb`.
 
 The code blocks marked `notebook.cell` are examples or declarations in ordinary Markdown; the mark has no execution semantics. The optional `ooc/popper.og` index uses `::name` and `::end` to delimit sections; its typed nodes and arrows index local files or node IDs. Its checksum is the SHA-256 of the file bytes with the entire `checksum:` line removed.
 
 ```text { type: notebook.cell }
 testbed := ^testbed:[a-z0-9-]{2,32}$          # research.json testbed.id
 kind    := improves | simplifies
+procedure := substitute-value | verbatim
 verdict := corroborated | refuted | inconclusive
 seq     := ^[1-9][0-9]*$                       # position of an event in its trace
 ```
@@ -77,13 +82,14 @@ seq     := ^[1-9][0-9]*$                       # position of an event in its tra
 ```text { type: notebook.cell }
 Charter    = { problem: String, testbed, delta_min: Number, max_tested: Integer, holdout_delta: Number, tag: String }
 Prediction = { kind, delta: Number, forbids: String }        # fixed before any run of its arm
-Conjecture = { claim: String, diff: Patch, base: commit, prediction: Prediction, rescues?: seq }
+Key        = { procedure, knob?: String, n?: Integer, seed: "conjecturer" | "root", offered?: Integer, bits: Number | null }
+Conjecture = { claim: String, diff: Patch, base: commit, key: Key, prediction: Prediction, rescues?: seq }   # diff = engine(base, key) unless verbatim
 Arm        = { commit, seeds: [Integer; 3] }                 # the code under test and its derived seeds
 Run        = { arm: seq, i: 1..3, seed: Integer, commit, holdout?: true }
 Result     = { run: seq, val_bpb?: Number | null, memory_gb: Number, status: "ok" | "crash" | "timeout", reason?: String }
 Verdict    = { conjecture: seq, verdict, h: [Number], b: [Number], bits: 0 | 1, holdout?: true }
 Advance    = { from: commit, to: commit }                    # the base moves; only after corroborated
-Return     = { tested, refuted, corroborated, inconclusive, edge, holdout: verdict | "not_run", base: commit, P2: String }
+Return     = { tested, refuted, corroborated, inconclusive, edge, selection: Number, holdout: verdict | "not_run", base: commit, P2: String }
 Event      = { seq, world: "human" | "theory" | "data" | "frame", kind, body, cites: [seq] }
 Trace      = [Event]                                         # append only
 Notebook   = notes(Trace)                                    # what the Steward reads
@@ -108,6 +114,7 @@ Each trace stores one UTF-8 JSON object per line, with `seq` starting at 1 and c
 - `bits(verdict) = 1` when the registered prediction forbids some outcomes of the test and allows others. For `simplifies`, the line count is part of the test. A prediction that forbids nothing ("may change val_bpb") or everything is refused before it runs (`unfalsifiable`).
 - An `inconclusive` verdict (a crash or a timeout) carries 0 bits. It is not a refutation; it is an experiment that did not happen.
 - `edge(trace) = Σ bits(verdict)` over probe verdicts: how much the data has told the loop. Refutations count exactly as much as corroborations. The holdout does not feed back into the loop.
+- **Selection** runs the other way. `key.bits = log2(|offered|)` when the Conjecturer picks a move from the Engine's offered set, `0` when the trace root picks it (`seed: "root"`), and `null` for a `verbatim` diff, whose selection is not counted. `selection(trace) = Σ key.bits` over counted conjectures: how much the theory chose. A night reports both: the bits it spent and the bits the data returned.
 - A corroborated conjecture is **not** shown true. It is the best-tested conjecture so far, and every later test may still refute it (`docs/vary-cybernetics.md` P5).
 
 ## §3 Algebra
@@ -118,11 +125,13 @@ ehash(e)    = hex(sha256(JCS(e)))                      # RFC 8785 JCS
 root(empty) = hex(sha256("popper/1"))                  # research.json loop.root_empty
 root(w · e) = hex(sha256(root(w) || ehash(e)))         # || joins two hex strings, hashed as UTF-8
 seed(r, i)  = int(hex(sha256(r || "seed/" || i))[0:8], 16)   # r = root just after the event that registers the arm
+pick(r, O)  = O[int(hex(sha256(r || "engine"))[0:8], 16) mod |O|]  # seed "root"; r = root just before the conjecture
 ```
 
 - **Monoid.** Traces compose by concatenation; the empty trace is the identity.
 - **Registration by chaining.** A prediction is registered when its `conjecture` event is in the chain. Any later edit changes every later root (`broken_chain`), so a prediction cannot be changed after a result without detection.
 - **Seed derivation.** The Critic derives seeds from the root after registration rather than choosing them; replay derives the same seeds. Encode the replicate index as decimal text without padding.
+- **Determinism of the Engine.** A `substitute-value` diff is a pure function of the base, the ladders and the key. Replay regenerates the offered set and the diff bytes.
 - **Determinism of the rule.** `verdict` is a pure function of the prediction, the base results and the arm results. Replaying the results of a trace gives the same verdicts and the same root.
 - **Single-comparison bound.** For `improves`, under exchangeability and with no ties, the chance that all three arm values fall below all three base values is `1 / C(6,3) = 1/20 = 0.05`. The gain threshold can only tighten that criterion. This is not a calibrated error rate for the adaptive loop.
 
@@ -165,6 +174,8 @@ Refusals use codes, not message text. Use the first failing code in table order.
 | `out_of_scope` | a diff touches a file outside `testbed.edit`, or adds a dependency |
 | `confound` | a diff touches the seed lines, `TIME_BUDGET`, `MAX_SEQ_LEN`, `EVAL_TOKENS` or the evaluation call |
 | `unfalsifiable` | a prediction has no `kind`, a `delta` below `charter.delta_min`, or forbids no outcome or all outcomes (§2) |
+| `bad_key` | a key names a procedure, knob or offset that does not exist at the base, or a move off its ladder |
+| `pure_chance` | a `substitute-value` diff differs from the bytes its key gives, or a key's `offered` or `bits` is not the count §2 gives |
 | `ad_hoc` | a conjecture reuses the bytes of a refuted diff, or a rule or charter changes to save a refuted conjecture |
 | `unregistered` | a `run` cites no earlier `conjecture` (or the charter for the base; or the `stop` or last probe verdict for the holdout) |
 | `post_hoc` | a prediction is first recorded, or changed, after a `result` of its arm |
@@ -181,6 +192,7 @@ Refusals use codes, not message text. Use the first failing code in table order.
 The Recorder writes to the Steward. A note is second person, present tense, at most 200 words, and follows every probe verdict. The holdout is reported in `return`.
 
 - It says what was conjectured [conjecture e], what the conjecture forbade, what the data returned [result e], and which way the rule went [verdict e], and whether the base moved [advance e].
+- It names the pick: which move of how many offered, and its bits, as a swerve that the Steward did not make; for `verbatim`, that the selection was not counted.
 - It names a refutation as knowledge: what is now ruled out.
 - It names a corroboration as survival: what the conjecture risked, and that it may still fall.
 - It cites an event inline as `[e<seq>]` and a pin as `[pin:<id>]`.
@@ -204,6 +216,8 @@ The Recorder writes to the Steward. A note is second person, present tense, at m
 | R11 | every factual statement in a note cites an event, and no note uses a forbidden word (§6) |
 | R12 | the trace root follows §3 |
 | R13 | projecting the trace to `results.tsv` (`research.json` `loop.status_map`) gives one row per arm run under test |
+| R14 | every `substitute-value` diff equals the Engine's output on its base and key, and every key is in the offered set |
+| R15 | every `key.bits` follows §2, and `return.selection` is their sum |
 
 ## Citations
 
@@ -218,6 +232,7 @@ The Recorder writes to the Steward. A note is second person, present tense, at m
 | [Cybernetics (Wiener, 1948)](https://en.wikipedia.org/wiki/Cybernetics:_Or_Control_and_Communication_in_the_Animal_and_the_Machine) | deviation-counteracting (negative) feedback |
 | [Permutation test](https://en.wikipedia.org/wiki/Permutation_test) | the 1/20 bound in §3 |
 | [RFC 8785](https://www.rfc-editor.org/rfc/rfc8785) | JCS for `ehash` |
+| [tulip `a2b9560`](https://github.com/wetware-hq/tulip/tree/a2b956086f97d547f267efa47f3efabbd48995d6) | the writing engine: pick, Engine, bits, clinamen (`docs/frame-writing-engine.md`) |
 
 ## Falsification
 
@@ -235,6 +250,8 @@ Actively try to break the loop. Each row must fail with its code.
 | Evaluate on shard 06541 halfway through the night | `peek` |
 | Note says "depth 9 is the better model" | `verification` |
 | Delete a refuted conjecture from the trace | `broken_chain` |
+| Pick `("MATRIX_LR", +1)` and write `MATRIX_LR = 0.045` | `pure_chance` |
+| Pick `("DEPTH", +4)` at `DEPTH = 8` | `bad_key` |
 
 ## Licence
 

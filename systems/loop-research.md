@@ -1,8 +1,8 @@
 # `loop-research` — LOOP(data) { POSITIVE; NEGATIVE } RETURN
 
-`type: system` · roles: **Conjecturer**, **Critic**, **Recorder** · subordinate to `docs/follow-research-contract.md`.
+`type: system` · roles: **Conjecturer**, **Engine**, **Critic**, **Recorder** · subordinate to `docs/follow-research-contract.md`.
 
-This is one research night, from the Steward's charter to the holdout. It composes the two skills and the Recorder's notebook into a single append-only trace.
+This is one research night, from the Steward's charter to the holdout. It composes the three skills and the Recorder's notebook into a single append-only trace.
 
 ## Specification
 
@@ -11,10 +11,10 @@ This is one research night, from the Steward's charter to the holdout. It compos
   "id": "systems/loop-research.md",
   "type": "system",
   "role": "run a charter to RETURN: base, then conjecture and refutation until the budget, then the holdout once",
-  "reads": ["research.json", "charter", "skills/conjecture-hypothesis.md", "skills/refute-experiment.md"],
+  "reads": ["research.json", "charter", "skills/conjecture-hypothesis.md", "skills/substitute-value.md", "skills/refute-experiment.md"],
   "writes": ["trace", "results.tsv", "notebook"],
   "must": ["start from a Steward charter", "replicate the base first", "one conjecture under test at a time", "a note after every probe verdict", "stop at max_tested or Steward stop", "compare on the holdout only at RETURN if the base changed", "return P2"],
-  "check": ["R1-R13"]
+  "check": ["R1-R15"]
 }
 ```
 
@@ -22,6 +22,7 @@ This is one research night, from the Steward's charter to the holdout. It compos
 
 - ← [../docs/read-repository.md](../docs/read-repository.md)
 - ← [../skills/conjecture-hypothesis.md](../skills/conjecture-hypothesis.md)
+- ← [../skills/substitute-value.md](../skills/substitute-value.md)
 - ← [../skills/refute-experiment.md](../skills/refute-experiment.md)
 
 ## Procedure
@@ -32,13 +33,13 @@ setup:   prepare the pinned checkout and cache (docs/pin-sources.md)
          create popper/<tag> at source.commit; append the charter as seq 1
 base:    Critic runs the base three times → b      # seeds from the root after the charter
 LOOP(data) {
-  POSITIVE: Conjecturer emits one conjecture on the base      # TT
+  POSITIVE: Conjecturer picks one offered move; Engine writes its diff   # TT
   NEGATIVE: Critic runs it until refuted, inconclusive, or corroborated   # EE
             corroborated → advance; b := h
   Recorder emits one note citing the conjecture, results, verdict, advance
 } until verdicts ≥ charter.max_tested or Steward emits stop
 RETURN:  if the base changed, Critic compares first base vs last base on the holdout
-         Recorder emits return { tested, refuted, corroborated, inconclusive, edge, holdout, base, P2 }
+         Recorder emits return { tested, refuted, corroborated, inconclusive, edge, selection, holdout, base, P2 }
 ```
 
 - **Unattended between charter and RETURN.** Like the source, the loop does not stop to ask whether to continue. Unlike the source, it does stop, at the charter's budget, and the Steward may `stop` or `amend` at any time. An `amend` applies only from the next conjecture on, never to one already registered (`ad_hoc`).
@@ -54,26 +55,26 @@ RETURN:  if the base changed, Critic compares first base vs last base on the hol
 |---|---|---|---|
 | 1 | human | charter | `delta_min = 0.001`, `max_tested = 3`, `holdout_delta = 0.001`, tag `nov25` |
 | 2–7 | data | run, result | base `228791f` × 3, seeds 618655339, 1770127804, 4035022987: `b = [0.9981, 0.9976, 0.9984]`, `min(b) = 0.9976` |
-| 8 | theory | conjecture | A: `MATRIX_LR` 0.04 → 0.05, `improves`, `delta = 0.002` |
-| 9–10 | data | run, result | seed 1878499161: 0.9979 ≥ 0.9976 |
+| 8 | theory | conjecture | A: pick `(MATRIX_LR, +1)` of 39, 5.285 bits; Engine writes 0.04 → 0.05; `improves`, `delta = 0.002` |
+| 9–10 | data | run, result | seed 3421276788: 0.9979 ≥ 0.9976 |
 | 11 | data | verdict | **refuted** after one run, 1 bit; the base stays |
 | 12 | frame | note | a learning rate of 0.05 is ruled out |
-| 13 | theory | conjecture | B: `WARMDOWN_RATIO` 0.5 → 0.6, `improves`, `delta = 0.001`, cites 11 |
+| 13 | theory | conjecture | B: pick `(WARMDOWN_RATIO, +1)` of 38 (A no longer offered), 5.248 bits; 0.5 → 0.6; `improves`, `delta = 0.001`, cites 11 |
 | 14–19 | data | run, result | `h = [0.9958, 0.9962, 0.9955]`, all below 0.9976; mean gain 0.0022 ≥ 0.001 |
 | 20 | data | verdict | **corroborated**, 1 bit |
 | 21 | data | advance | base := arm B; `b := h`, `min(b) = 0.9955` |
 | 22 | frame | note | B survived one test; it may still fall |
-| 23 | theory | conjecture | C: `DEPTH` 8 → 10, `improves`, `delta = 0.003` |
+| 23 | theory | conjecture | C: pick `(DEPTH, +1)` of 38, 5.248 bits; 8 → 10; `improves`, `delta = 0.003` |
 | 24–25 | data | run, result | crash: no `val_bpb` line |
 | 26 | data | verdict | **inconclusive**, 0 bits; three tests used |
 | 27 | frame | note | nothing is ruled in or out about depth |
 | 28–39 | data | run, result | holdout: base `228791f` → `[1.0012, 1.0017, 1.0009]`; base B → `[0.9991, 0.9994, 0.9988]` |
 | 40 | data | verdict | holdout **corroborated**: all three below 1.0009, mean gain 0.0022 ≥ 0.001 |
-| 41 | frame | return | tested 3, refuted 1, corroborated 1, inconclusive 1, edge 2 bits, P2 below |
+| 41 | frame | return | tested 3, refuted 1, corroborated 1, inconclusive 1, edge 2 bits, selection 15.781 bits, P2 below |
 
 The note at seq 22, as written by the Recorder:
 
-> You see the second conjecture lengthen the warmdown to 0.6 and risk refutation by any run at or above 0.9976 [e13]. All three runs come in below it, at 0.9958, 0.9962 and 0.9955 [e15] [e17] [e19], a mean gain of 0.0022 against the 0.001 it predicts. It is corroborated [e20] and becomes the base [e21]. It survives this test; it may still fall.
+> You see the second conjecture move WARMDOWN_RATIO one rung up, from 0.5 to 0.6, picked from 38 moves because the refuted one is no longer offered: 5.248 bits of swerve [e13]. It risks refutation by any run at or above 0.9976 [e13]. All three runs come in below it, at 0.9958, 0.9962 and 0.9955 [e15] [e17] [e19], a mean gain of 0.0022 against the 0.001 it predicts. It is corroborated [e20] and becomes the base [e21]. It survives this test; it may still fall.
 
 P2: *Does the warmdown gain survive at ten layers once the batch is halved to fit memory?*
 
@@ -92,7 +93,7 @@ The base and holdout runs are in the trace, not in the TSV.
 
 ## Replay
 
-Run this cell with Node.js from the repository root. It checks the object graph checksum, trace digest and root, and replays the seeds and the four `improves` verdicts in the example. It does not train a model.
+Run this cell with Node.js from the repository root. It checks the object graph checksum, trace digest and root, regenerates every offered set and Engine diff from its key, sums the selection bits, and replays the seeds and the four `improves` verdicts in the example. It does not train a model.
 
 ```js { type: notebook.cell }
 const assert = require("node:assert/strict");
@@ -125,18 +126,58 @@ const mean = values => values.reduce((sum, n) => sum + n, 0) / values.length;
 const charter = events[1].body;
 const scores = rows => rows.filter(r => r.body.status === "ok").map(r => r.body.val_bpb);
 let baseArm = 1;
+
+const { knobs } = config.engine;
+const line = /^([A-Z_]+) = (\S+) +(#.*)$/;
+const rewrite = (text, v) => {
+  const [, name, , comment] = text.match(line), head = `${name} = ${v}`;
+  return head + " ".repeat(Math.max(1, text.indexOf("#") - head.length)) + comment;
+};
+const patch = (n, a, b) => `--- a/train.py\n+++ b/train.py\n@@ -${n} +${n} @@\n-${a}\n+${b}\n`;
+const at = Object.fromEntries(Object.entries(knobs).map(([k, v]) => [k, v.text]));
+const refuted = new Set();
+const move = (knob, n) => {
+  const { ladder } = knobs[knob], j = ladder.indexOf(at[knob].match(line)[2]);
+  assert(j >= 0 && ladder[j + n] !== undefined && n !== 0);                   // bad_key
+  return patch(knobs[knob].line, at[knob], rewrite(at[knob], ladder[j + n]));
+};
+const offered = () => Object.keys(knobs).flatMap(k => {
+  const j = knobs[k].ladder.indexOf(at[k].match(line)[2]);
+  return knobs[k].ladder.map((_, x) => x - j).filter(n => n !== 0).map(n => move(k, n));
+}).filter(d => !refuted.has(d));
+let selection = 0;
 for (const [i, event] of events.entries()) {
   if (i === 0) continue;
   const { seq, kind, body, cites } = event;
   assert.equal(seq, i);
   assert(cites.every(id => id > 0 && id < seq));
+  if (kind === "conjecture") {
+    const { key } = body;
+    if (key.procedure === "substitute-value") {
+      const offer = offered();
+      assert.equal(key.offered, offer.length);
+      const pick = key.seed === "root"
+        ? offer[parseInt(sha(roots[i - 1] + "engine").slice(0, 8), 16) % offer.length]
+        : move(key.knob, key.n);
+      assert.equal(body.diff, pick);                                         // pure_chance
+      assert(!refuted.has(body.diff));                                       // ad_hoc
+      assert.equal(key.bits, key.seed === "root" ? 0 : +Math.log2(offer.length).toFixed(3));
+      selection += key.bits;
+    } else assert.equal(key.bits, null);                                     // verbatim
+  }
   roots.push(sha(roots[i - 1] + sha(jcs(event))));
   if (kind === "run") {
     assert(cites.includes(body.arm));
     assert.equal(body.seed, parseInt(sha(roots[body.arm] + "seed/" + body.i).slice(0, 8), 16));
   }
-  if (kind === "advance") baseArm = events[cites[0]].body.conjecture;
+  if (kind === "advance") {
+    baseArm = events[cites[0]].body.conjecture;
+    const { key, diff } = events[baseArm].body;
+    if (key.procedure === "substitute-value") at[key.knob] = diff.split("\n")[4].slice(1);
+  }
+  if (kind === "return") assert.equal(body.selection, +selection.toFixed(3));
   if (kind !== "verdict") continue;
+  if (body.verdict === "refuted" && !body.holdout) refuted.add(events[body.conjecture].body.diff);
   const runOf = r => events[r.body.run].body;
   const results = cites.map(id => events[id]).filter(e => e.kind === "result")
     .sort((a, b) => runOf(a).i - runOf(b).i);
@@ -159,13 +200,14 @@ for (const [i, event] of events.entries()) {
   assert.equal(body.bits, verdict === "inconclusive" ? 0 : 1);
 }
 assert.equal(roots.at(-1), pin.root);
-console.log(`Replayed ${pin.events} events: ${pin.root}`);
+console.log(`Replayed ${pin.events} events, selection ${selection.toFixed(3)} bits: ${pin.root}`);
 ```
 
 ## Falsification
 
 | Challenge | Failure signal |
 |---|---|
+| Edit the diff at seq 8 to `MATRIX_LR = 0.045` | `pure_chance` (R14) |
 | Swap seq 8 and seq 9 | `post_hoc`, and every later root changes |
 | Run a fourth replicate of A | `self_verdict` |
 | Count the crash at seq 25 as a refutation | `self_verdict` (R7) |

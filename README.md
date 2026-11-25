@@ -13,7 +13,7 @@ LOOP(data) {
 ## How a night runs
 
 1. **You write the charter.** You set the problem, the smallest gain worth keeping, and how many ideas to test. Then you can go to sleep.
-2. **The Conjecturer proposes.** It reads what has been tried, including every refutation. It proposes one change to `train.py` and registers what result would refute it.
+2. **The Conjecturer picks; the Engine writes.** The Conjecturer reads what has been tried, including every refutation. It picks one move from those the Engine offers, such as "one rung up the `MATRIX_LR` ladder", and registers what result would refute it. The Engine writes the diff to `train.py` by a fixed rule. The trace records how many bits of choice each pick took.
 3. **The Critic tries to refute it.** It trains the change up to three times, using seeds derived from the trace. For an improvement, it stops when a run fails to beat the best base run.
 4. **The data decides.** An improvement becomes the new base only if all three runs beat all three base runs and the mean gain meets the prediction. A simplification must remove more lines than it adds and stay within the allowed mean loss. Every verdict stays in the trace.
 5. **The holdout is read at RETURN.** If the base changed, the Critic compares the first and last base on a data shard the loop never saw. The Recorder returns the result and the next problem, P2.
@@ -24,6 +24,8 @@ LOOP(data) {
 |---|---|
 | Steward | You. You set the rules by which the loop can be wrong. You never conjecture or judge. |
 | Conjecturer | The positive loop: it builds on what has survived. |
+| Engine | The writing engine from [tulip](https://github.com/wetware-hq/tulip): it turns a pick into diff bytes and never chooses. |
+| Selection | The bits of choice the theory put in. The edge counts the bits the data gave back. |
 | Critic | The negative loop: it tries to remove what should not survive. |
 | Recorder | The role that turns the trace into a notebook for the Steward. |
 | Prediction | What a change forbids, fixed before any run. |
@@ -42,15 +44,15 @@ Start with [`DISCLAIMER`](DISCLAIMER) and the [repository map](docs/read-reposit
 | Path | Holds |
 |---|---|
 | `DISCLAIMER` | one-line research-use notice |
-| `docs/` | reading order, research contract, source and data pins, principles |
-| `skills/` | the Conjecturer and the Critic |
+| `docs/` | reading order, research contract, source and data pins, principles, the writing engine |
+| `skills/` | the Conjecturer, the Engine and the Critic |
 | `systems/loop-research.md` | the whole night, with a worked trace |
 | `research.json` | pins, testbed, data split, decision rule, charter defaults |
 | `ooc/popper.og` | the object graph |
 | `traces/` | a replayable example, not measured results |
 
-popper is a specbase, not an executable. All rules and formats are defined here. Running new experiments requires the pinned autoresearch checkout and data, one NVIDIA GPU, and `uv`. The specbase follows the form of tulip; no other specification is needed to run or replay the loop.
+popper is a specbase, not an executable. All rules and formats are defined here. Running new experiments requires the pinned autoresearch checkout and data, one NVIDIA GPU, and `uv`. Its generator is the writing engine of tulip, pinned in `research.json` and restated in [`docs/frame-writing-engine.md`](docs/frame-writing-engine.md); no other specification is needed to run or replay the loop.
 
 ## Licence
 
-MIT, see [`LICENSE`](LICENSE). autoresearch and its data are cited and pinned, not vendored. The Popper texts are cited.
+MIT, see [`LICENSE`](LICENSE). autoresearch, its data and tulip are cited and pinned, not vendored. The Popper texts are cited.

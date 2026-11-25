@@ -5,13 +5,13 @@ updated: 2026-11-25
 domain: popper|auto-research|falsifiability|cybernetics
 scope: all
 governs: docs/follow-research-contract.md
-checksum: sha256:338a2cff1133a0d8ce38a501229223757fa1789e242f0c670ff04161c9c0a782
+checksum: sha256:e53f9f8001745568edbecd983e2094b4c9d3aa0e22da6be76282de1a5c821c21
 ::end
 
 ::schema
 node-types: [stage, skill, system, assertion, meta]
 edge-types: [requires, precedes, composes, refuses]
-scope-levels: [all, steward, conjecturer, critic, recorder]
+scope-levels: [all, steward, conjecturer, engine, critic, recorder]
 ::end
 
 ::index
@@ -20,7 +20,9 @@ banner | meta | all | 1.00 | academic, tentative, steward-only-charters
 contract | stage | all | 1.00 | worlds, edge, verdict-bit, trace, flow-laws, codes, notebook-grammar, predicates
 pins | stage | all | 1.00 | source-commit, digest, unlicensed-cite-only, probe-shard, holdout-shard, harness
 vary | stage | all | 1.00 | positive-feedback, negative-feedback, second-order, demarcation, asymmetry, ad-hoc, corroboration
+frame | stage | all | 1.00 | tulip@a2b9560, writing-engine, pick, engine-never-chooses, selection-bits, clinamen
 conjecture | skill | conjecturer | 1.00 | type-ii, one-change, kind, delta, forbids, bold, rescues
+engine | skill | engine | 1.00 | substitute-value, S+n, ladder, offered, log2-bits, seed-root, verbatim
 refute | skill | critic | 1.00 | type-i, derived-seeds, three-replicates, first-counter-instance, dominance, 1-in-20, advance
 loop | system | recorder | 1.00 | charter, base, LOOP-data, notes, max-tested, holdout-once, P2, replay
 stop | assertion | all | 1.00 | return, holdout-read, P2
@@ -40,7 +42,7 @@ Read DISCLAIMER before any node.
 
 ::node [id=contract type=stage confidence=1.00 scope=all updated=2026-11-25]
 ::dense
-steward|conjecturer|critic|recorder|verdict-bit|trace-root|closed-loop|unfalsifiable|ad-hoc|peek|R1-R13
+steward|conjecturer|critic|recorder|verdict-bit|trace-root|closed-loop|unfalsifiable|ad-hoc|peek|pure-chance|R1-R15
 ::end
 ::full
 The research contract defines roles, events and flow laws.
@@ -49,6 +51,7 @@ The research contract defines roles, events and flow laws.
 ->[:requires] docs/follow-research-contract.md
 ->[:precedes] pins
 ->[:precedes] vary
+->[:precedes] frame
 ::end
 ::end
 
@@ -96,6 +99,38 @@ One registered prediction per conjecture.
 ->[:refuses] confound
 ->[:refuses] unfalsifiable
 ->[:refuses] ad_hoc
+->[:composes] engine
+::end
+::end
+
+::node [id=frame type=stage confidence=1.00 scope=all updated=2026-11-25]
+::dense
+tulip@a2b9560|reader=conjecturer|engine(constraint,key)=engine(base,key)|choice-bits=selection|clinamen=seed-root
+::end
+::full
+tulip's writing engine is the generator of the positive loop.
+::end
+::edges
+->[:requires] docs/frame-writing-engine.md
+->[:requires] research.json
+->[:precedes] engine
+::end
+::end
+
+::node [id=engine type=skill confidence=1.00 scope=engine updated=2026-11-25]
+::dense
+offered(base)-refuted|pick(knob,n)|diff=move(knob,n)|bits=log2(offered)|seed-root=0|verbatim=null
+::end
+::full
+The Engine writes each diff from its key; it never chooses.
+::end
+::edges
+->[:requires] skills/substitute-value.md
+->[:requires] research.json
+->[:precedes] refute
+->[:refuses] bad_key
+->[:refuses] pure_chance
+->[:refuses] ad_hoc
 ::end
 ::end
 
@@ -137,7 +172,7 @@ return|holdout-read|P2
 ::end
 ::assertion
 trigger: verdicts >= charter.max_tested OR Steward stop
-check: one holdout comparison by the Critic if the base changed; last event kind = return with P2; R1-R13
+check: one holdout comparison by the Critic if the base changed; last event kind = return with P2 and selection; R1-R15
 on-pass: halt
 on-fail: ->[:requires] contract
 ::end

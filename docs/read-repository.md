@@ -22,6 +22,7 @@ popper is a cybernetic auto-research specbase. A Conjecturer proposes, a Critic 
 
 - → [follow-research-contract.md](follow-research-contract.md)
 - → [vary-cybernetics.md](vary-cybernetics.md)
+- → [frame-writing-engine.md](frame-writing-engine.md)
 - → [../systems/loop-research.md](../systems/loop-research.md)
 
 ## Route
@@ -32,6 +33,8 @@ Read `DISCLAIMER` first. The contract governs every route.
 |---|---|
 | Run a whole research night under a Steward's charter | contract → `systems/loop-research.md` |
 | Propose the next hypothesis | contract → `skills/conjecture-hypothesis.md` |
+| Turn a pick into the exact diff | contract → `skills/substitute-value.md` |
+| See how tulip's writing engine generates conjectures | `docs/frame-writing-engine.md` |
 | Test a registered hypothesis and give its verdict | contract → `skills/refute-experiment.md` |
 | Understand the feedback loops and what changes from autoresearch | `docs/vary-cybernetics.md` |
 | Check whether a source, shard or harness may be used | `docs/pin-sources.md` |
@@ -48,9 +51,13 @@ flowchart LR
     C --> P[pin-sources]
     C --> V[vary-cybernetics]
     V --> H[conjecture-hypothesis]
+    C --> W[frame-writing-engine]
+    W --> S[substitute-value]
+    H --> S
     V --> E[refute-experiment]
     P --> E
-    H --> L[loop-research]
+    S --> L[loop-research]
+    H --> L
     E --> L
 ```
 
