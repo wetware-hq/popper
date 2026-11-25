@@ -131,9 +131,9 @@
   },
   "traces": {
     "traces/nov25.jsonl": {
-      "digest": "sha256:24f6c43ae506a2fd7c857f6ecbb8a4b677e895007189bc4d662d9655f41cb60b",
+      "digest": "sha256:08782816a8bec85ea14c91e5303c72238e7be7a7050e0123387327ca64a461ff",
       "events": 41,
-      "root": "3fb580b217be7b6697222657fc347818a31f4e6d793fb8f31cd243f3907dfd36",
+      "root": "753d38074085a1b929aa600ab615a999a2b5f7511eb5b938c0b1ebe09430c56c",
       "illustrative": true
     }
   }

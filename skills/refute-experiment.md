@@ -67,7 +67,7 @@ For `improves`, ties at `min(b)` refute. For `simplifies`, the mean-loss limit i
 
 ## Emitting
 
-1. Append a `verdict` event citing the conjecture and its arm results. The base results are found from the initial runs or the verdict cited by the latest advance.
+1. Append a `verdict` event citing the conjecture, all three base results and every arm result used. Cite the initial base's results until the first advance; thereafter cite the arm results of the corroborated verdict that set the current base.
 2. If `corroborated`, append an `advance` event from the base to the arm commit, citing the verdict. The arm becomes the base and `h` becomes `b`.
 3. If `refuted` or `inconclusive`, the base does not move. Reset the branch to the base; the diff stays in the conjecture event.
 4. Append one row per arm run to `results.tsv`: `commit`, `val_bpb` (`0.000000` on a crash), `memory_gb`, `status` from `research.json` `loop.status_map` (only the last replicate of a corroborated arm is `keep`; earlier replicates of every arm are `discard`), and the claim as `description`.

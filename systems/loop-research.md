@@ -124,7 +124,7 @@ assert.equal(roots[0], config.loop.root_empty);
 const mean = values => values.reduce((sum, n) => sum + n, 0) / values.length;
 const charter = events[1].body;
 const scores = rows => rows.filter(r => r.body.status === "ok").map(r => r.body.val_bpb);
-let base = scores(events.slice(1).filter(e => e.kind === "result" && events[e.body.run].body.arm === 1));
+let baseArm = 1;
 for (const [i, event] of events.entries()) {
   if (i === 0) continue;
   const { seq, kind, body, cites } = event;
@@ -135,12 +135,17 @@ for (const [i, event] of events.entries()) {
     assert(cites.includes(body.arm));
     assert.equal(body.seed, parseInt(sha(roots[body.arm] + "seed/" + body.i).slice(0, 8), 16));
   }
-  if (kind === "advance") base = events[cites[0]].body.h;
+  if (kind === "advance") baseArm = events[cites[0]].body.conjecture;
   if (kind !== "verdict") continue;
   const results = cites.map(id => events[id]).filter(e => e.kind === "result");
-  const inFirstBase = r => body.holdout && events[r.body.run].body.i <= 3;
-  const b = body.holdout ? scores(results.filter(inFirstBase)) : base;
-  const arm = results.filter(r => !inFirstBase(r));
+  const runOf = r => events[r.body.run].body;
+  const inBase = r => body.holdout ? runOf(r).i <= 3 : runOf(r).arm === baseArm;
+  const base = results.filter(inBase);
+  assert.deepEqual(base.map(r => runOf(r).i), [1, 2, 3]);
+  const b = scores(base);
+  assert.equal(b.length, 3);
+  const arm = results.filter(r => !inBase(r));
+  if (!body.holdout) assert(arm.every(r => runOf(r).arm === body.conjecture));
   const h = scores(arm);
   assert.deepEqual(body.b, b);
   assert.deepEqual(body.h, h);

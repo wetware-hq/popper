@@ -95,7 +95,7 @@ Notebook   = notes(Trace)                                    # what the Steward 
 | `theory` | `conjecture` | `Conjecture` | the base's verdict, and any refuted conjecture it learns from |
 | `data` | `run` | `Run` | the conjecture (or charter, for the base; or the last verdict, for the holdout) it tests |
 | `data` | `result` | `Result` | its run |
-| `data` | `verdict` | `Verdict` | the conjecture and arm results; for the holdout, also the final advance and first base's holdout results |
+| `data` | `verdict` | `Verdict` | the conjecture and every base and arm result used; for the holdout, also the final advance |
 | `data` | `advance` | `Advance` | a corroborated verdict |
 | `frame` | `note` | prose to the Steward, §6 | every event it reports |
 | `frame` | `return` | §4.8 | every verdict |
