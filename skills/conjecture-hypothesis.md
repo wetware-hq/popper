@@ -1,6 +1,6 @@
 # `conjecture-hypothesis` — POSITIVE: propose a refutable change
 
-`type: skill` · `spec: agent.skill` · role: **Conjecturer** · subordinate to `docs/follow-agent-contract.md`.
+`type: skill` · role: **Conjecturer** · subordinate to `docs/follow-research-contract.md`.
 
 The Conjecturer is the loop's positive feedback. It reads everything the loop has learned, including every refutation, and proposes one bold change to the current base, with a prediction that the data could break. It is Type II: it has memory and is meant to use it. It never runs anything and never judges.
 
@@ -40,7 +40,7 @@ output = Conjecture = {
 ## Procedure
 
 1. **Read the problem.** Read the charter and the current base. Read every `verdict` in the trace, and every refuted diff. A refutation says what not to try again; corroborations say where the base came from.
-2. **Choose boldly.** Prefer a conjecture that forbids more: a larger predicted `delta`, or a deletion that predicts no loss. A bold conjecture that is refuted teaches more than a timid one that survives. The choice of *what* to try is the machine's own and needs no justification beyond the claim.
+2. **Choose boldly.** Prefer a conjecture that forbids more, such as a larger predicted gain. The Conjecturer chooses what to try and records the idea in the claim.
 3. **Make one change.** Write a diff of `train.py` against the base that tests one idea. Two ideas in one diff cannot be told apart by a verdict.
 4. **Stay in the testbed.** The diff must not touch `prepare.py`, `pyproject.toml`, `uv.lock`, the two seed calls in `train.py` (`torch.manual_seed`, `torch.cuda.manual_seed`; lines 458–459 at the pin), `TIME_BUDGET`, `MAX_SEQ_LEN`, `EVAL_TOKENS`, or the `evaluate_bpb` call (`out_of_scope`, `confound`). It must run within the source's memory and time limits; a crash is `inconclusive`, not a refutation, but it spends one of the charter's tests.
 5. **Predict.** Set the kind and the threshold before any run.
@@ -48,11 +48,11 @@ output = Conjecture = {
     | `kind` | Prediction | `forbids` |
     |---|---|---|
     | `improves` | every arm replicate is below every base replicate, and the arm mean is at least `delta` below the base mean | any arm replicate `≥ min(base)`, or a mean gain below `delta` |
-    | `simplifies` | the diff deletes more lines than it adds, and the arm mean is at most `charter.delta_min` above the base mean | a mean loss above `delta_min` |
+    | `simplifies` | the diff deletes more lines than it adds, and the arm mean is at most `delta` above the base mean | no net deletion, or a mean loss above `delta` |
 
     `delta ≥ charter.delta_min` (`unfalsifiable`). For `simplifies`, `delta = charter.delta_min`.
 6. **Do not rescue.** A diff whose bytes match a refuted diff is refused (`ad_hoc`). A revision of a refuted idea (say, a smaller learning rate after a larger one failed) is a new conjecture with a different diff, and it cites the refutation in `rescues`.
-7. **Emit.** Append one `conjecture` event with `world: "theory"`, citing the base's last verdict and any refutation it learns from. It is now registered: it cannot change (`post_hoc`).
+7. **Emit.** Append one `conjecture` event with `world: "theory"`, citing the current base's verdict or its charter and initial results, and any refutation it learns from. It is now registered: it cannot change (`post_hoc`).
 
 ## Refusals
 

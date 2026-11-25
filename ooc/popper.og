@@ -4,8 +4,8 @@ version: 1
 updated: 2026-11-25
 domain: popper|auto-research|falsifiability|cybernetics
 scope: all
-governs: docs/follow-agent-contract.md
-checksum: sha256:3f6147f79dfc5e0d0bee7f9da1fb99a0975575f44b8e2281dd35d27304a65235
+governs: docs/follow-research-contract.md
+checksum: sha256:338a2cff1133a0d8ce38a501229223757fa1789e242f0c670ff04161c9c0a782
 ::end
 
 ::schema
@@ -24,7 +24,6 @@ conjecture | skill | conjecturer | 1.00 | type-ii, one-change, kind, delta, forb
 refute | skill | critic | 1.00 | type-i, derived-seeds, three-replicates, first-counter-instance, dominance, 1-in-20, advance
 loop | system | recorder | 1.00 | charter, base, LOOP-data, notes, max-tested, holdout-once, P2, replay
 stop | assertion | all | 1.00 | return, holdout-read, P2
-__changelog | meta | all | 1.00 | changes, version
 ::end
 
 ::node [id=banner type=meta confidence=1.00 scope=all updated=2026-11-25]
@@ -44,10 +43,10 @@ Read DISCLAIMER before any node.
 steward|conjecturer|critic|recorder|verdict-bit|trace-root|closed-loop|unfalsifiable|ad-hoc|peek|R1-R13
 ::end
 ::full
-Load docs/follow-agent-contract.md.
+The research contract defines roles, events and flow laws.
 ::end
 ::edges
-->[:requires] docs/follow-agent-contract.md
+->[:requires] docs/follow-research-contract.md
 ->[:precedes] pins
 ->[:precedes] vary
 ::end
@@ -58,7 +57,7 @@ Load docs/follow-agent-contract.md.
 karpathy/autoresearch@228791f|climbmix@915333b|probe=shard_06542|holdout=shard_06541|harness=36b9a7c3
 ::end
 ::full
-Load docs/pin-sources.md. Check every digest in research.json before any run.
+The source, data and harness pins govern the testbed.
 ::end
 ::edges
 ->[:requires] docs/pin-sources.md
@@ -71,10 +70,10 @@ Load docs/pin-sources.md. Check every digest in research.json before any run.
 
 ::node [id=vary type=stage confidence=1.00 scope=all updated=2026-11-25]
 ::dense
-tulip@a2b9560|program.md@228791f|P1-P7|positive=conjecture|negative=refutation|steward=second-order
+program.md@228791f|P1-P7|positive=conjecture|negative=refutation|steward=second-order
 ::end
 ::full
-Load docs/vary-cybernetics.md.
+The positive and negative loops meet at the verdict.
 ::end
 ::edges
 ->[:requires] docs/vary-cybernetics.md
@@ -88,7 +87,7 @@ Load docs/vary-cybernetics.md.
 read-all-verdicts|one-diff|train.py-only|kind|delta>=delta_min|forbids|register-before-run
 ::end
 ::full
-Load skills/conjecture-hypothesis.md.
+One registered prediction per conjecture.
 ::end
 ::edges
 ->[:requires] skills/conjecture-hypothesis.md
@@ -105,7 +104,7 @@ Load skills/conjecture-hypothesis.md.
 seed(r,i)|3-replicates|stop-at-first-h>=min(b)|mean-gain>=delta|inconclusive=0-bits|advance
 ::end
 ::full
-Load skills/refute-experiment.md.
+The Critic tests the prediction on the pinned probe.
 ::end
 ::edges
 ->[:requires] skills/refute-experiment.md
@@ -122,11 +121,10 @@ Load skills/refute-experiment.md.
 charter|base-x3|LOOP(data)|note-per-verdict|max_tested|RETURN|holdout-once|traces/nov25.jsonl
 ::end
 ::full
-Load systems/loop-research.md.
+A charter runs to RETURN; the trace is an example.
 ::end
 ::edges
 ->[:requires] systems/loop-research.md
-->[:requires] traces/nov25.jsonl
 ->[:precedes] stop
 ->[:refuses] verification
 ->[:refuses] peek
@@ -139,14 +137,8 @@ return|holdout-read|P2
 ::end
 ::assertion
 trigger: verdicts >= charter.max_tested OR Steward stop
-check: holdout read once by the Critic; last event kind = return with P2; R1-R13
+check: one holdout comparison by the Critic if the base changed; last event kind = return with P2; R1-R13
 on-pass: halt
 on-fail: ->[:requires] contract
-::end
-::end
-
-::node [id=__changelog type=meta confidence=1.00 scope=all updated=2026-11-25]
-::dense
-v1|2026-11-25|initial specbase: fork of karpathy/autoresearch varying tulip's cybernetics (WET-137)
 ::end
 ::end
