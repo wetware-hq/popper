@@ -5,7 +5,7 @@ updated: 2026-11-25
 domain: popper|auto-research|falsifiability|cybernetics
 scope: all
 governs: docs/follow-research-contract.md
-checksum: sha256:7db475da654a6decdc9543d58c875ca7955f28b942355be68fe9494fe586dd88
+checksum: sha256:f0bfda55d54461770bafed3cce6975d3a15c20f223d0dfdad9dfeced9ce336b0
 ::end
 
 ::schema
@@ -156,7 +156,7 @@ A charter runs to RETURN; the trace is an example.
 return|holdout-read|P2
 ::end
 ::assertion
-trigger: verdicts >= charter.max_tested OR Steward stop
+trigger: verdicts >= charter.max_tested OR Steward stop OR empty hinge
 check: one holdout comparison by the Critic if the base changed; last event kind = return with P2; R1-R16
 on-pass: halt
 on-fail: ->[:requires] contract

@@ -38,7 +38,7 @@ LOOP(data) {
   NEGATIVE: Critic runs it until refuted, inconclusive, or corroborated   # EE
             corroborated → advance; b := h
   Recorder emits one note citing the conjecture, results, verdict, advance
-} until verdicts ≥ charter.max_tested or Steward emits stop
+} until verdicts ≥ charter.max_tested, or Steward emits stop, or a hinge offers nothing (size 0: the search space is closed)
 RETURN:  if the base changed, Critic compares first base vs last base on the holdout
          Recorder emits return { tested, refuted, corroborated, inconclusive, edge, holdout, base, P2 }
 ```

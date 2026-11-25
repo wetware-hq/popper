@@ -52,7 +52,7 @@ line' = NAME + " = " + str(v') + padding + comment   # padding keeps the comment
 diff  = "--- a/train.py\n+++ b/train.py\n@@ -<ln> +<ln> @@\n-<line>\n+<line'>\n"
 ```
 
-The hinge offers every `(constant, n)` whose diff is not empty and does not match the bytes of a refuted diff. Two options that write the same diff count as one, for example two different offsets that both clamp to the same end. `bits = log2(distinct diffs)`.
+The hinge offers every `(constant, n)` whose diff is not empty and does not match the bytes of a refuted diff. If none is left, the hinge has size 0 and the loop returns (contract §4.9). Two options that write the same diff count as one, for example two different offsets that both clamp to the same end. `bits = log2(distinct diffs)`.
 
 ### `combine-lines` (tulip `combine-lines`, Queneau's line matrix)
 
