@@ -137,8 +137,9 @@ for (const [i, event] of events.entries()) {
   }
   if (kind === "advance") baseArm = events[cites[0]].body.conjecture;
   if (kind !== "verdict") continue;
-  const results = cites.map(id => events[id]).filter(e => e.kind === "result");
   const runOf = r => events[r.body.run].body;
+  const results = cites.map(id => events[id]).filter(e => e.kind === "result")
+    .sort((a, b) => runOf(a).i - runOf(b).i);
   const inBase = r => body.holdout ? runOf(r).i <= 3 : runOf(r).arm === baseArm;
   const base = results.filter(inBase);
   assert.deepEqual(base.map(r => runOf(r).i), [1, 2, 3]);
