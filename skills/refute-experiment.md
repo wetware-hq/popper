@@ -74,7 +74,7 @@ For `improves`, ties at `min(b)` refute. For `simplifies`, the mean-loss limit i
 
 ## The holdout, at RETURN
 
-If the first and last base are the same commit, do not open the holdout. Otherwise use the harness in `docs/pin-sources.md` for one comparison: run the first base three times with indices 1–3, then test the last base with indices 4–6 using the `improves` rule and `delta = charter.holdout_delta`. Use the root and sequence number of the `stop` event if it triggered RETURN, otherwise the last probe verdict. Mark the runs and verdict with `body.holdout: true`. The verdict cites the conjecture that set the final base, its advance, and the holdout results. A failed replicate of the first base makes the comparison inconclusive; the holdout never causes an advance.
+If the first and last base are the same commit, do not open the holdout. Otherwise use the harness in `docs/pin-sources.md` for one comparison: run the first base three times with indices 1–3, then test the last base with indices 4–6 using the `improves` rule and `delta = charter.holdout_delta`. Use the root and sequence number of the event that triggered RETURN: the `stop`, the empty `hinge` (contract §4.9), or otherwise the last probe verdict. Mark the runs and verdict with `body.holdout: true`. The verdict cites the conjecture that set the final base, its advance, and the holdout results. A failed replicate of the first base makes the comparison inconclusive; the holdout never causes an advance.
 
 ## Refusals
 

@@ -102,7 +102,7 @@ Notebook   = notes(Trace)                                    # what the Steward 
 | `theory` | `choice` | `Choice` | its hinge |
 | `machine` | `key` | `Key` | its choice, or its hinge for a machine pick |
 | `theory` | `conjecture` | `Conjecture` | the base's verdict, any refuted conjecture it learns from, and its key |
-| `data` | `run` | `Run` | the conjecture (or charter, for the base; or the last verdict, for the holdout) it tests |
+| `data` | `run` | `Run` | the conjecture (or charter, for the base; or the event that ended the probe loop, for the holdout) it tests |
 | `data` | `result` | `Result` | its run |
 | `data` | `verdict` | `Verdict` | the conjecture and every base and arm result used; for the holdout, also the final advance |
 | `data` | `advance` | `Advance` | a corroborated verdict |
@@ -181,7 +181,7 @@ Refusals use codes, not message text. Use the first failing code in table order.
 | `pure_chance` | a diff differs from `engine(constraint, key)`, or a selection is not explained by a choice, the rule or a declared machine seed |
 | `unfalsifiable` | a prediction has no `kind`, a `delta` below `charter.delta_min`, or forbids no outcome or all outcomes (§2) |
 | `ad_hoc` | a conjecture reuses the bytes of a refuted diff, or a rule or charter changes to save a refuted conjecture |
-| `unregistered` | a `run` cites no earlier `conjecture` (or the charter for the base; or the `stop` or last probe verdict for the holdout) |
+| `unregistered` | a `run` cites no earlier `conjecture` (or the charter for the base; or the `stop`, the empty `hinge` or the last probe verdict that ended the probe loop, for the holdout) |
 | `post_hoc` | a prediction is first recorded, or changed, after a `result` of its arm |
 | `stateful` | a verdict depends on anything but the prediction, the base results and the arm results |
 | `self_verdict` | a verdict that the rule in `research.json` `critic.test` does not give, or a keep or discard with no verdict |
@@ -210,7 +210,7 @@ The Recorder writes to the Steward. A note is second person, present tense, at m
 | R2 | the charter and every amend or stop came from the Steward |
 | R3 | every diff stays inside `testbed.edit` and leaves frozen files, seed lines and evaluation untouched |
 | R4 | every prediction is falsifiable (§2) with `delta ≥ charter.delta_min` |
-| R5 | every run cites its earlier registration event: the conjecture, the charter for the base, or the `stop` or last probe verdict for the holdout |
+| R5 | every run cites its earlier registration event: the conjecture, the charter for the base, or the `stop`, the empty `hinge` or the last probe verdict that ended the probe loop, for the holdout |
 | R6 | every run's seed equals `seed(r, i)` for its arm (§3) |
 | R7 | every verdict is the rule's output on its cited results, and an `improves` arm stops at its first refuting replicate |
 | R8 | every advance cites exactly one corroborated verdict not cited by an earlier advance |

@@ -45,7 +45,7 @@ RETURN:  if the base changed, Critic compares first base vs last base on the hol
 
 - **Unattended between charter and RETURN.** Like the source, the loop does not stop to ask whether to continue. Unlike the source, it does stop, at the charter's budget, and the Steward may `stop` or `amend` at any time. An `amend` applies only from the next conjecture on, never to one already registered (`ad_hoc`).
 - **One arm at a time.** Arms are tested in trace order, so every verdict reads the base that was current when the conjecture was registered.
-- **The holdout runs cite what ended the probe loop.** Their `arm` is the sequence number of the Steward's `stop` or the last probe verdict. Their seeds are derived from the root just after that event.
+- **The holdout runs cite what ended the probe loop.** Their `arm` is the sequence number of the Steward's `stop`, the empty hinge, or the last probe verdict, whichever ended the loop. Their seeds are derived from the root just after that event.
 - **P2.** The return names one new problem the night opened, as a question. It does not say what is true.
 
 ## Worked trace
