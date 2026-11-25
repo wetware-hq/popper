@@ -1,6 +1,6 @@
-# `follow-agent-contract` — the popper contract
+# `follow-research-contract` — the popper contract
 
-`type: resource.contract` · `spec: agent.contract` · normative. Every other file is subordinate to this one.
+`type: resource.contract` · normative. Every other file is subordinate to this one.
 
 popper researches at the edge between two worlds. In the theory world a machine conjectures; in the data world a frozen evaluator reports a number. The only thing that crosses the edge is a **verdict**: an observed result read against a prediction that was fixed before the result existed. This is Popper's asymmetry made into a law (no number of passing runs proves a conjecture, one failing run refutes it), and a pair of feedback loops in the cybernetic sense made into a file format: a positive loop that amplifies what has survived, and a negative loop that removes what has not.
 
@@ -8,7 +8,7 @@ popper researches at the edge between two worlds. In the theory world a machine 
 
 ```json { type: notebook.cell }
 {
-  "id": "docs/follow-agent-contract.md",
+  "id": "docs/follow-research-contract.md",
   "type": "resource.contract",
   "role": "define the two worlds, the edge, the trace, flow laws, refusals and predicates",
   "reads": ["DISCLAIMER", "research.json", "ooc/popper.og"],
@@ -31,16 +31,16 @@ popper researches at the edge between two worlds. In the theory world a machine 
 
 ```toml { type: notebook.cell }
 config = "research.json"                 # source pin, testbed, data, critic rule, charter defaults
-index = "ooc/popper.og"                  # ObjectGraph traversal index
+index = "ooc/popper.og"                  # optional local file map
 skills = ["skills/conjecture-hypothesis.md", "skills/refute-experiment.md"]
 system = "systems/loop-research.md"      # LOOP(data) { POSITIVE hypothesis; NEGATIVE experiments; } RETURN
-variant = "docs/vary-cybernetics.md"     # what changed from tulip and from autoresearch, and why
+variant = "docs/vary-cybernetics.md"     # feedback and principles of refutation
 store = "one trace per charter"          # JSON Lines, append only, root-chained (§3)
 ```
 
 ## Indications
 
-- An agent is asked to run experiments autonomously, and each kept change must be explainable by a prediction that could have failed and did not.
+- A kept change must be explainable by a prediction that could have failed and did not.
 - A Steward wants to leave an autoresearch-style loop running unattended and read back, in the morning, which ideas were refuted, which survived, and whether the survivors hold on data the loop never saw.
 - A reviewer must tell a corroborated result from a lucky one.
 
@@ -61,7 +61,9 @@ store = "one trace per charter"          # JSON Lines, append only, root-chained
 | **Critic** | data (negative) | runs the registered test exactly: seeds, replicates, rule; emits the verdict (Type I) | reads the rationale, chooses which runs count, reruns a refuted arm |
 | **Recorder** | frame | writes notebook entries to the Steward from the trace | invents an event, calls a conjecture true |
 
-The Conjecturer, the Critic and the Recorder are the same agent following different files: `skills/conjecture-hypothesis.md`, `skills/refute-experiment.md` and `systems/loop-research.md`. The Steward is a person; an agent may not write or amend a charter (`self_charter`). The evaluator (`prepare.py` `evaluate_bpb` at the pin) is not a role; it is the data world's only voice.
+The roles are defined in `skills/conjecture-hypothesis.md`, `skills/refute-experiment.md` and `systems/loop-research.md`. Their read and write boundaries apply even if a single runner performs them. Only the human Steward writes, amends or stops a charter (`self_charter`). The pinned `prepare.py` supplies the evaluator, `evaluate_bpb`.
+
+The code blocks marked `notebook.cell` are examples or declarations in ordinary Markdown; the mark has no execution semantics. The optional `ooc/popper.og` index uses `::name` and `::end` to delimit sections; its typed nodes and arrows index local files or node IDs. Its checksum is the SHA-256 of the file bytes with the entire `checksum:` line removed.
 
 ```text { type: notebook.cell }
 testbed := ^testbed:[a-z0-9-]{2,32}$          # research.json testbed.id
@@ -73,15 +75,15 @@ seq     := ^[1-9][0-9]*$                       # position of an event in its tra
 ## §1 Objects
 
 ```text { type: notebook.cell }
-Pin        = { url: URL, digest: "sha256:" hex, licence: String | null }
 Charter    = { problem: String, testbed, delta_min: Number, max_tested: Integer, holdout_delta: Number, tag: String }
 Prediction = { kind, delta: Number, forbids: String }        # fixed before any run of its arm
 Conjecture = { claim: String, diff: Patch, base: commit, prediction: Prediction, rescues?: seq }
 Arm        = { commit, seeds: [Integer; 3] }                 # the code under test and its derived seeds
-Run        = { arm: seq, i: 1..3, seed: Integer, commit }    # one uv run of train.py
-Result     = { run: seq, val_bpb: Number | null, memory_gb: Number, status: "ok" | "crash" | "timeout" }
-Verdict    = { conjecture: seq, verdict, h: [Number], b: [Number], bits: 0 | 1 }
+Run        = { arm: seq, i: 1..3, seed: Integer, commit, holdout?: true }
+Result     = { run: seq, val_bpb?: Number | null, memory_gb: Number, status: "ok" | "crash" | "timeout", reason?: String }
+Verdict    = { conjecture: seq, verdict, h: [Number], b: [Number], bits: 0 | 1, holdout?: true }
 Advance    = { from: commit, to: commit }                    # the base moves; only after corroborated
+Return     = { tested, refuted, corroborated, inconclusive, edge, holdout: verdict | "not_run", base: commit, P2: String }
 Event      = { seq, world: "human" | "theory" | "data" | "frame", kind, body, cites: [seq] }
 Trace      = [Event]                                         # append only
 Notebook   = notes(Trace)                                    # what the Steward reads
@@ -93,17 +95,19 @@ Notebook   = notes(Trace)                                    # what the Steward 
 | `theory` | `conjecture` | `Conjecture` | the base's verdict, and any refuted conjecture it learns from |
 | `data` | `run` | `Run` | the conjecture (or charter, for the base; or the last verdict, for the holdout) it tests |
 | `data` | `result` | `Result` | its run |
-| `data` | `verdict` | `Verdict` | the conjecture and every result it reads |
+| `data` | `verdict` | `Verdict` | the conjecture and every base and arm result used; for the holdout, also the final advance |
 | `data` | `advance` | `Advance` | a corroborated verdict |
 | `frame` | `note` | prose to the Steward, §6 | every event it reports |
 | `frame` | `return` | §4.8 | every verdict |
 
+Each trace stores one UTF-8 JSON object per line, with `seq` starting at 1 and citations pointing to earlier events in the same trace. A `commit` is a full Git commit ID, and a `Patch` is a unified diff. The Steward starts with `research.json` `charter` defaults or sets explicit values: positive finite thresholds, a positive integer test budget, and a tag that forms a valid Git branch name under `popper/`. An `amend` supplies a replacement charter, keeping the testbed and tag fixed; a `stop` supplies a reason. For a holdout run, `i` ranges from 1 to 6 and `arm` is the event that triggered RETURN.
+
 ## §2 Two worlds and the edge
 
 - The **edge** is the set of `verdict` events. It is precise: each verdict carries at most one bit.
-- `bits(verdict) = 1` when the registered prediction forbids some outcomes of the metric and allows others, so that the test could have gone either way. A prediction that forbids nothing ("may change val_bpb") or everything carries 0 bits and is refused before it runs (`unfalsifiable`). This is tulip's illusory fork, moved to the other side of the edge: a test that cannot fail tells You nothing.
+- `bits(verdict) = 1` when the registered prediction forbids some outcomes of the test and allows others. For `simplifies`, the line count is part of the test. A prediction that forbids nothing ("may change val_bpb") or everything is refused before it runs (`unfalsifiable`).
 - An `inconclusive` verdict (a crash or a timeout) carries 0 bits. It is not a refutation; it is an experiment that did not happen.
-- `edge(trace) = Σ bits(verdict)`: how much the data has told the loop. Refutations count exactly as much as corroborations.
+- `edge(trace) = Σ bits(verdict)` over probe verdicts: how much the data has told the loop. Refutations count exactly as much as corroborations. The holdout does not feed back into the loop.
 - A corroborated conjecture is **not** shown true. It is the best-tested conjecture so far, and every later test may still refute it (`docs/vary-cybernetics.md` P5).
 
 ## §3 Algebra
@@ -118,9 +122,9 @@ seed(r, i)  = int(hex(sha256(r || "seed/" || i))[0:8], 16)   # r = root just aft
 
 - **Monoid.** Traces compose by concatenation; the empty trace is the identity.
 - **Registration by chaining.** A prediction is registered when its `conjecture` event is in the chain. Any later edit changes every later root (`broken_chain`), so a prediction cannot be changed after a result without detection.
-- **Seeds are a declared clinamen.** The Critic's seeds come from the root after registration, so the Conjecturer cannot choose them, and a replay derives the same seeds.
+- **Seed derivation.** The Critic derives seeds from the root after registration rather than choosing them; replay derives the same seeds. Encode the replicate index as decimal text without padding.
 - **Determinism of the rule.** `verdict` is a pure function of the prediction, the base results and the arm results. Replaying the results of a trace gives the same verdicts and the same root.
-- **Exactness of the test.** For `improves`, three arm runs against three base runs with independent seeds: if the conjecture has no effect, the six values are exchangeable and the chance that all three arm values fall below all three base values is `1 / C(6,3) = 1/20 = 0.05`.
+- **Single-comparison bound.** For `improves`, under exchangeability and with no ties, the chance that all three arm values fall below all three base values is `1 / C(6,3) = 1/20 = 0.05`. The gain threshold can only tighten that criterion. This is not a calibrated error rate for the adaptive loop.
 
 ## §4 Flow laws
 
@@ -147,22 +151,22 @@ stateDiagram-v2
 5. **The testbed is fixed.** A diff touches only `research.json` `testbed.edit`, adds no dependency, and leaves the frozen files' bytes equal to their pins (`out_of_scope`, `drift`). It never touches the seed lines, the time budget or the evaluation (`confound`).
 6. **No rescue.** A refuted diff is never run again under a weaker prediction, and the rule is never changed to save it. A revision is a new conjecture with a different diff that cites the refutation (`ad_hoc`).
 7. **Append only.** Nothing in a trace is edited or removed. A refuted conjecture stays in the trace forever, and its diff stays recoverable from the event. A wrong note gets a new note that says so.
-8. **The loop returns.** It stops when `charter.max_tested` conjectures have verdicts or when the Steward emits `stop`. At RETURN the Critic reads the holdout once, comparing the first base with the last (`peek` on any other read), and the Recorder emits `return` with the new problem.
+8. **The loop returns.** It stops when `charter.max_tested` conjectures have verdicts or when the Steward emits `stop`. If the base changed, the Critic opens one holdout comparison between first and last base at RETURN (`peek` on any other access). The Recorder emits `Return`, with probe counts and probe edge only, the separate holdout verdict or `not_run`, and the new problem.
 
 ## §5 Refusal codes
 
-Agents match on codes, never on message text. Refuse with the first failing code in table order.
+Refusals use codes, not message text. Use the first failing code in table order.
 
 | Code | When |
 |---|---|
 | `unpinned` | the source, a data shard or the holdout harness has no pin in `research.json` |
 | `drift` | pinned bytes do not hash to `digest`, or a replay gives different verdicts |
-| `self_charter` | an agent produced a `charter`, `amend` or `stop` event |
+| `self_charter` | a `charter`, `amend` or `stop` event came from anyone but the Steward |
 | `out_of_scope` | a diff touches a file outside `testbed.edit`, or adds a dependency |
 | `confound` | a diff touches the seed lines, `TIME_BUDGET`, `MAX_SEQ_LEN`, `EVAL_TOKENS` or the evaluation call |
-| `unfalsifiable` | a prediction has no `kind`, a `delta` below `charter.delta_min`, or forbids no outcome (§2) |
+| `unfalsifiable` | a prediction has no `kind`, a `delta` below `charter.delta_min`, or forbids no outcome or all outcomes (§2) |
 | `ad_hoc` | a conjecture reuses the bytes of a refuted diff, or a rule or charter changes to save a refuted conjecture |
-| `unregistered` | a `run` cites no earlier `conjecture` (or the charter, for the base; or the last verdict, for the holdout) |
+| `unregistered` | a `run` cites no earlier `conjecture` (or the charter for the base; or the `stop` or last probe verdict for the holdout) |
 | `post_hoc` | a prediction is first recorded, or changed, after a `result` of its arm |
 | `stateful` | a verdict depends on anything but the prediction, the base results and the arm results |
 | `self_verdict` | a verdict that the rule in `research.json` `critic.test` does not give, or a keep or discard with no verdict |
@@ -174,7 +178,7 @@ Agents match on codes, never on message text. Refuse with the first failing code
 
 ## §6 Notebook grammar
 
-The Recorder writes to the Steward, who was asleep. A note is second person, present tense, at most 200 words, and follows every verdict.
+The Recorder writes to the Steward. A note is second person, present tense, at most 200 words, and follows every probe verdict. The holdout is reported in `return`.
 
 - It says what was conjectured [conjecture e], what the conjecture forbade, what the data returned [result e], and which way the rule went [verdict e], and whether the base moved [advance e].
 - It names a refutation as knowledge: what is now ruled out.
@@ -191,12 +195,12 @@ The Recorder writes to the Steward, who was asleep. A note is second person, pre
 | R2 | the charter and every amend or stop came from the Steward |
 | R3 | every diff stays inside `testbed.edit` and leaves frozen files, seed lines and evaluation untouched |
 | R4 | every prediction is falsifiable (§2) with `delta ≥ charter.delta_min` |
-| R5 | every run cites a registered prediction earlier in the chain (the charter for the base, the last verdict for the holdout) |
+| R5 | every run cites its earlier registration event: the conjecture, the charter for the base, or the `stop` or last probe verdict for the holdout |
 | R6 | every run's seed equals `seed(r, i)` for its arm (§3) |
 | R7 | every verdict is the rule's output on its cited results, and an `improves` arm stops at its first refuting replicate |
 | R8 | every advance cites exactly one corroborated verdict not cited by an earlier advance |
 | R9 | no refuted diff is rerun, and no rule changes between a refutation and the next verdict |
-| R10 | the holdout is read once, at RETURN, by the Critic only |
+| R10 | the holdout is opened only by the Critic, for one comparison at RETURN if the base changed |
 | R11 | every factual statement in a note cites an event, and no note uses a forbidden word (§6) |
 | R12 | the trace root follows §3 |
 | R13 | projecting the trace to `results.tsv` (`research.json` `loop.status_map`) gives one row per arm run under test |
@@ -206,11 +210,10 @@ The Recorder writes to the Steward, who was asleep. A note is second person, pre
 | Pin | Supports |
 |---|---|
 | [autoresearch `228791f`](https://github.com/karpathy/autoresearch/tree/228791fb499afffb54b46200aca536f79142f117) | the testbed, the loop being forked (`docs/pin-sources.md`) |
-| [tulip `a2b9560`](https://github.com/wetware-hq/tulip/tree/a2b956086f97d547f267efa47f3efabbd48995d6) | the parent contract: worlds, edge, trace, codes |
 | [Popper, *The Logic of Scientific Discovery* (1959)](https://en.wikipedia.org/wiki/The_Logic_of_Scientific_Discovery) | falsifiability, demarcation, corroboration, no ad hoc rescue |
 | [Popper, *Conjectures and Refutations* (1963)](https://en.wikipedia.org/wiki/Conjectures_and_Refutations) | the loop's two halves |
 | [Popper, *Objective Knowledge* (1972)](https://en.wikipedia.org/wiki/Objective_Knowledge) | P1 → TT → EE → P2 |
-| [Falsifiability](https://en.wikipedia.org/wiki/Falsifiability) | the ticket's pin |
+| [Falsifiability](https://en.wikipedia.org/wiki/Falsifiability) | demarcation of testable claims |
 | [Maruyama, *The Second Cybernetics* (1963)](https://en.wikipedia.org/wiki/Magoroh_Maruyama) | deviation-amplifying (positive) feedback |
 | [Cybernetics (Wiener, 1948)](https://en.wikipedia.org/wiki/Cybernetics:_Or_Control_and_Communication_in_the_Animal_and_the_Machine) | deviation-counteracting (negative) feedback |
 | [Permutation test](https://en.wikipedia.org/wiki/Permutation_test) | the 1/20 bound in §3 |
@@ -222,7 +225,7 @@ Actively try to break the loop. Each row must fail with its code.
 
 | Challenge | Failure signal |
 |---|---|
-| Let the agent raise `delta_min` itself after a run of near misses | `self_charter` |
+| Let the Conjecturer raise `delta_min` after a run of near misses | `self_charter` |
 | Edit `evaluate_bpb` so the metric reads lower | `drift` |
 | Change `torch.manual_seed(42)` inside the conjecture's diff | `confound` |
 | Register "this may affect val_bpb" | `unfalsifiable` |

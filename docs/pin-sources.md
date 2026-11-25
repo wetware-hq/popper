@@ -1,8 +1,8 @@
 # `pin-sources` — what the loop may run on
 
-`type: resource.reference` · `spec: agent.reference` · subordinate to `docs/follow-agent-contract.md`, which governs on any conflict.
+`type: resource.reference` · subordinate to `docs/follow-research-contract.md`, which governs on any conflict.
 
-Every byte the loop runs, reads or scores against is pinned to a commit or a revision and a digest. This file lists the `$source`, the data, and the one harness popper adds.
+The testbed files, input shards and holdout harness are pinned by commit or revision and SHA-256. The tokenizer and run outputs are derived locally.
 
 ## Specification
 
@@ -20,12 +20,12 @@ Every byte the loop runs, reads or scores against is pinned to a commit or a rev
 
 ## Graph
 
-- ← [follow-agent-contract.md](follow-agent-contract.md)
+- ← [follow-research-contract.md](follow-research-contract.md)
 - → [../skills/refute-experiment.md](../skills/refute-experiment.md)
 
-## The `$source`
+## Source
 
-[karpathy/autoresearch](https://github.com/karpathy/autoresearch) at commit `228791fb499afffb54b46200aca536f79142f117` (25 Mar 2026). An agent edits one file, `train.py` (a single-GPU [nanochat](https://github.com/karpathy/nanochat) GPT), trains for a fixed five minutes, reads `val_bpb` from the frozen `prepare.py` evaluator, and keeps or resets. The README ends "License: MIT", but the repository has no `LICENSE` file at the pin and GitHub reports no licence. popper therefore vendors none of it: it cites the files, restates the loop in its own words, and pins by digest. The Steward clones the source at the pin to run it.
+[karpathy/autoresearch](https://github.com/karpathy/autoresearch) at commit `228791fb499afffb54b46200aca536f79142f117` (25 Mar 2026). The editable file is `train.py`, a single-GPU [nanochat](https://github.com/karpathy/nanochat) GPT. The evaluator in frozen `prepare.py` reports `val_bpb` after a five-minute training budget. The README says MIT, but the repository has no `LICENSE` file at the pin. The source is cited and pinned, not vendored.
 
 | Path | sha256 | Role in popper |
 |---|---|---|
@@ -34,8 +34,9 @@ Every byte the loop runs, reads or scores against is pinned to a commit or a rev
 | `train.py` | `2954175f…814414` | the only file a diff may touch; its two seed calls (lines 458–459 at the pin) belong to the Critic |
 | `pyproject.toml` | `675c150a…f1af` | frozen: no new dependency |
 | `uv.lock` | `03174c5c…a0a3` | frozen |
+| `.python-version` | `7a41a413…e707` | frozen |
 
-Full digests are in `research.json` `source.files`.
+Full digests, including the Python version and dependency lock, are in `research.json` `source.files`.
 
 ## Data
 
@@ -43,15 +44,20 @@ Full digests are in `research.json` `source.files`.
 
 | Split | File | sha256 | Used by |
 |---|---|---|---|
-| train | `shard_00000` … `shard_<num_shards − 1>`, `num_shards ≤ 6541` | per file, as downloaded by `prepare.py` | `train.py` |
+| train | shard index 0 through `num_shards − 1`, `1 ≤ num_shards ≤ 6541` | Git LFS oid for each file at the pinned revision | `train.py` |
 | probe | `shard_06542.parquet` | `769fe59d…9f94` | every loop verdict (the source's pinned val shard) |
 | holdout | `shard_06541.parquet` | `51da1a9b…3c73` | RETURN only, once (`peek`) |
 
-`prepare.py` downloads shards `0 … num_shards − 1` plus the val shard, so `shard_06541` is never downloaded or trained on while `num_shards ≤ 6541`. A Steward who sets `--num-shards -1` trains on the holdout and must choose another (`unpinned` until pinned). A bounded rerun of `prepare.py` does not delete shards already in the cache, so before every run the Critic also checks that `~/.cache/autoresearch/data` holds no `shard_06541.parquet` (`peek`).
+## Prepare the probe testbed
+
+1. Clone the upstream repository into a separate checkout, check out `source.commit`, and compare each file against `source.files` before running it. From that checkout run `uv sync --locked`.
+2. Choose `num_shards` (default 10) and an empty run home. Under that home's `.cache/autoresearch/data`, stage exactly the chosen train shards and the probe, never the holdout. File names are `shard_<five-digit index>.parquet`.
+3. Fetch from https://huggingface.co/datasets/karpathy/climbmix-400b-shuffle/resolve/ followed by `data.revision` and the file name. Use the same path with `raw` instead of `resolve` to read the Git LFS pointer; compare the file's SHA-256 to its `oid sha256:` and the probe to `data.probe.digest`. Do not allow a missing staged file to fall back to upstream's mutable `main`.
+4. With `HOME` set to that run home and `UV_CACHE_DIR` set to the cache used for sync, run `uv run --locked prepare.py --num-shards <num_shards>`. The pinned preparer skips existing shard files and fits the tokenizer on the train split only. Keep that home and its tokenizer fixed for probe runs. Reject unexpected shards: the loader reads every parquet file there except the active validation file.
 
 ## The holdout harness
 
-The frozen evaluator reads only the file named by `VAL_SHARD`. To score the holdout without editing the testbed the Critic uses, popper pins one patched copy, run in a separate cache:
+The frozen evaluator reads only the file named by `VAL_SHARD`. At RETURN, if the base changed, the Critic stages the holdout from the pinned revision and checks its digest. Both bases use a copy of the pinned checkout with one patched `prepare.py` and a separate cache:
 
 | Item | Value |
 |---|---|
@@ -67,14 +73,13 @@ The tokenizer is reused, not retrained: it was fitted on the train shards only, 
 |---|---|
 | [autoresearch `228791f`](https://github.com/karpathy/autoresearch/tree/228791fb499afffb54b46200aca536f79142f117) | testbed, loop, evaluator |
 | [climbmix-400b-shuffle `915333b`](https://huggingface.co/datasets/karpathy/climbmix-400b-shuffle/tree/915333b4f8b8684f39aeaafea600fea6f43fb703) | probe and holdout shards |
-| [tulip `a2b9560`](https://github.com/wetware-hq/tulip/tree/a2b956086f97d547f267efa47f3efabbd48995d6) | pin discipline: cite and digest an unlicensed source, never vendor |
 
 ## Falsification
 
 | Challenge | Failure signal |
 |---|---|
 | Run with a `prepare.py` whose bytes are not `4f2ba9cb…` (or, at RETURN, `36b9a7c3…`) | `drift` |
-| Download all shards, then use `shard_06541` as the holdout | `unpinned` |
+| Stage `shard_06541` in the probe cache | `peek` |
 | Score the holdout with `shard_06542` still in the cache | `drift` |
 | Add a package to `pyproject.toml` | `out_of_scope` |
 

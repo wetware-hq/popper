@@ -1,30 +1,31 @@
 # popper
 
-**popper** is the cybernetic auto-research engine of Wetware. It forks the loop of Andrej Karpathy's [autoresearch](https://github.com/karpathy/autoresearch), where an agent edits a small language-model training script overnight and keeps whatever lowers the validation loss. popper changes the rule for what is kept. The agent must say in advance what result would prove its idea wrong. A separate critic then tries to prove it wrong. Only ideas the data fails to refute are kept.
+**popper** is a standalone cybernetic auto-research specification. In Andrej Karpathy's [autoresearch](https://github.com/karpathy/autoresearch), a change to a small language-model training script stays if it lowers the validation loss. In popper, the Conjecturer says in advance what result would count against the change. The Critic applies that test. Only changes the data fails to refute are kept.
 
 ```text
 VARY<CYBERNETICS>
 LOOP(data) {
   POSITIVE hypothesis;
   NEGATIVE experiments;
-} RETURN wetware-hq/popper
+} RETURN P2
 ```
 
 ## How a night runs
 
 1. **You write the charter.** You set the problem, the smallest gain worth keeping, and how many ideas to test. Then you can go to sleep.
-2. **The Conjecturer proposes.** It reads everything tried so far, including every failure. It proposes one change to `train.py` and states the prediction: lower by at least this much, on every run.
-3. **The Critic tries to refute it.** It trains the change three times, with seeds it derives from the record so nobody picks them. It stops at the first run that misses the prediction.
-4. **The data decides.** If all three runs beat all three runs of the current best, by enough, the change becomes the new best. Otherwise it is kept in the record as something ruled out.
-5. **The holdout is read once.** At the end, the first and the last best are each trained again and scored on a data shard the loop never saw. That result is the night's answer, and it gives you the next problem.
+2. **The Conjecturer proposes.** It reads what has been tried, including every refutation. It proposes one change to `train.py` and registers what result would refute it.
+3. **The Critic tries to refute it.** It trains the change up to three times, using seeds derived from the trace. For an improvement, it stops when a run fails to beat the best base run.
+4. **The data decides.** An improvement becomes the new base only if all three runs beat all three base runs and the mean gain meets the prediction. A simplification must remove more lines than it adds and stay within the allowed mean loss. Every verdict stays in the trace.
+5. **The holdout is read at RETURN.** If the base changed, the Critic compares the first and last base on a data shard the loop never saw. The Recorder returns the result and the next problem, P2.
 
 ## Words
 
 | Word | Means |
 |---|---|
 | Steward | You. You set the rules by which the loop can be wrong. You never conjecture or judge. |
-| Conjecturer | The agent's positive loop: it builds on what has survived. |
-| Critic | The agent's negative loop: it tries to remove what should not survive. |
+| Conjecturer | The positive loop: it builds on what has survived. |
+| Critic | The negative loop: it tries to remove what should not survive. |
+| Recorder | The role that turns the trace into a notebook for the Steward. |
 | Prediction | What a change forbids, fixed before any run. |
 | Verdict | One bit: corroborated or refuted. A crash is inconclusive. |
 | Corroborated | Survived the test so far. Never "true". |
@@ -34,21 +35,22 @@ LOOP(data) {
 
 ## Start here
 
-An agent starts at [`docs/read-repository.md`](docs/read-repository.md). A person who wants the reasoning reads [`docs/vary-cybernetics.md`](docs/vary-cybernetics.md). The contract is [`docs/follow-agent-contract.md`](docs/follow-agent-contract.md), and every other file defers to it.
+Start with [`DISCLAIMER`](DISCLAIMER) and the [repository map](docs/read-repository.md). The [research contract](docs/follow-research-contract.md) defines the roles, events and rules. To run a night, set a charter, [prepare the pinned testbed](docs/pin-sources.md), and follow the [research loop](systems/loop-research.md). To inspect a complete example without a GPU, use the [worked trace and replay](systems/loop-research.md#replay).
 
 ## What is in the repository
 
 | Path | Holds |
 |---|---|
 | `DISCLAIMER` | one-line research-use notice |
-| `docs/` | router, contract, source and data pins, the variation from tulip and autoresearch |
+| `docs/` | reading order, research contract, source and data pins, principles |
 | `skills/` | the Conjecturer and the Critic |
 | `systems/loop-research.md` | the whole night, with a worked trace |
 | `research.json` | pins, testbed, data split, decision rule, charter defaults |
 | `ooc/popper.og` | the object graph |
+| `traces/` | a replayable example, not measured results |
 
-popper is a specbase: documents an agent reads at run time. There is no app and no code here. To run it you need the pinned autoresearch checkout, one NVIDIA GPU and `uv`.
+popper is a specbase, not an executable. All rules and formats are defined here. Running new experiments requires the pinned autoresearch checkout and data, one NVIDIA GPU, and `uv`. The specbase follows the form of tulip; no other specification is needed to run or replay the loop.
 
 ## Licence
 
-MIT, see [`LICENSE`](LICENSE). autoresearch, its data and the Popper texts are cited and pinned, not vendored.
+MIT, see [`LICENSE`](LICENSE). autoresearch and its data are cited and pinned, not vendored. The Popper texts are cited.
