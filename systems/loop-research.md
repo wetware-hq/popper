@@ -185,15 +185,14 @@ for (const [i, event] of events.entries()) {
       if (at[k] === null) continue;
       const L = pos[k], hit = hunks.find(h => h.b > 0 && h.a <= L && L < h.a + h.b);
       if (hit) {
-        let o = hit.a, n = hit.c, cut = false, kept = null;
+        let o = hit.a, n = hit.c, kept = null, added = null;
         for (const l of hit.body) {
           if (l[0] === " " && o === L) kept = [l.slice(1), n];
-          if (l[0] === "-" && o === L) cut = true;
-          if (l[0] === "+" && cut && !kept && l.startsWith(`+${k} = `)) kept = [l.slice(1), n];
+          if (l[0] === "+" && !added && l.startsWith(`+${k} = `)) added = [l.slice(1), n];
           if (l[0] !== "+") o++;
           if (l[0] !== "-") n++;
         }
-        [at[k], pos[k]] = kept ?? [null, null];
+        [at[k], pos[k]] = kept ?? added ?? [null, null];
       } else pos[k] += hunks.filter(h => (h.b > 0 ? h.a + h.b - 1 : h.a) < L).reduce((s, h) => s + h.d - h.b, 0);
     }
   }
