@@ -53,6 +53,8 @@ output = Conjecture = {
     | `simplifies` | the diff deletes more lines than it adds, and the arm mean is at most `delta` above the base mean | no net deletion, or a mean loss above `delta` |
 
     `delta ≥ charter.delta_min` (`unfalsifiable`). For `simplifies`, `delta = charter.delta_min`.
+
+    The three Engine procedures rewrite assignments in place and never delete a line. So an Engine-written diff can only be `improves`. A `simplifies` prediction on one forbids every outcome, because its line count fails before any run, and it is refused as `unfalsifiable`. `simplifies` stays in the rule for a deletion procedure, which the Steward would have to pin in `research.json` `engine` first.
 6. **Do not rescue.** A diff whose bytes match a refuted diff is refused (`ad_hoc`). A revision of a refuted idea (say, a smaller learning rate after a larger one failed) is a new conjecture with a different diff, and it cites the refutation in `rescues`.
 7. **Emit.** Append one `conjecture` event with `world: "theory"`, citing the current base's verdict or its charter and initial results, and any refutation it learns from. It is now registered: it cannot change (`post_hoc`).
 
