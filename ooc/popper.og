@@ -5,7 +5,7 @@ updated: 2026-11-25
 domain: popper|auto-research|falsifiability|cybernetics
 scope: all
 governs: docs/follow-research-contract.md
-checksum: sha256:338a2cff1133a0d8ce38a501229223757fa1789e242f0c670ff04161c9c0a782
+checksum: sha256:f0bfda55d54461770bafed3cce6975d3a15c20f223d0dfdad9dfeced9ce336b0
 ::end
 
 ::schema
@@ -20,6 +20,7 @@ banner | meta | all | 1.00 | academic, tentative, steward-only-charters
 contract | stage | all | 1.00 | worlds, edge, verdict-bit, trace, flow-laws, codes, notebook-grammar, predicates
 pins | stage | all | 1.00 | source-commit, digest, unlicensed-cite-only, probe-shard, holdout-shard, harness
 vary | stage | all | 1.00 | positive-feedback, negative-feedback, second-order, demarcation, asymmetry, ad-hoc, corroboration
+engine | skill | conjecturer | 1.00 | tulip-writing-engine, hinge, choice-bits, key, substitute-value, combine-lines, traverse-tale, clinamen
 conjecture | skill | conjecturer | 1.00 | type-ii, one-change, kind, delta, forbids, bold, rescues
 refute | skill | critic | 1.00 | type-i, derived-seeds, three-replicates, first-counter-instance, dominance, 1-in-20, advance
 loop | system | recorder | 1.00 | charter, base, LOOP-data, notes, max-tested, holdout-once, P2, replay
@@ -40,7 +41,7 @@ Read DISCLAIMER before any node.
 
 ::node [id=contract type=stage confidence=1.00 scope=all updated=2026-11-25]
 ::dense
-steward|conjecturer|critic|recorder|verdict-bit|trace-root|closed-loop|unfalsifiable|ad-hoc|peek|R1-R13
+steward|conjecturer|critic|recorder|verdict-bit|trace-root|closed-loop|unfalsifiable|ad-hoc|peek|R1-R16
 ::end
 ::full
 The research contract defines roles, events and flow laws.
@@ -77,8 +78,27 @@ The positive and negative loops meet at the verdict.
 ::end
 ::edges
 ->[:requires] docs/vary-cybernetics.md
+->[:precedes] engine
 ->[:precedes] conjecture
 ->[:precedes] refute
+::end
+::end
+
+::node [id=engine type=skill confidence=1.00 scope=conjecturer updated=2026-11-25]
+::dense
+tulip@a2b9560|hinge|choice=log2(distinct-diffs)|key|diff=engine(constraint,key)|refuted-not-offered
+::end
+::full
+The Engine offers and writes; the Conjecturer only picks.
+::end
+::edges
+->[:requires] skills/write-conjecture.md
+->[:requires] research.json
+->[:precedes] conjecture
+->[:refuses] not_offered
+->[:refuses] pure_chance
+->[:refuses] bad_key
+->[:refuses] ragged
 ::end
 ::end
 
@@ -136,8 +156,8 @@ A charter runs to RETURN; the trace is an example.
 return|holdout-read|P2
 ::end
 ::assertion
-trigger: verdicts >= charter.max_tested OR Steward stop
-check: one holdout comparison by the Critic if the base changed; last event kind = return with P2; R1-R13
+trigger: verdicts >= charter.max_tested OR Steward stop OR empty hinge
+check: one holdout comparison by the Critic if the base changed; last event kind = return with P2; R1-R16
 on-pass: halt
 on-fail: ->[:requires] contract
 ::end

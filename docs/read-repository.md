@@ -31,7 +31,8 @@ Read `DISCLAIMER` first. The contract governs every route.
 | Task | Path |
 |---|---|
 | Run a whole research night under a Steward's charter | contract → `systems/loop-research.md` |
-| Propose the next hypothesis | contract → `skills/conjecture-hypothesis.md` |
+| Generate the next diff from a hinge | contract → `skills/write-conjecture.md` |
+| Propose the next hypothesis | contract → `skills/write-conjecture.md` → `skills/conjecture-hypothesis.md` |
 | Test a registered hypothesis and give its verdict | contract → `skills/refute-experiment.md` |
 | Understand the feedback loops and what changes from autoresearch | `docs/vary-cybernetics.md` |
 | Check whether a source, shard or harness may be used | `docs/pin-sources.md` |
@@ -47,7 +48,8 @@ flowchart LR
     R --> C[follow-research-contract]
     C --> P[pin-sources]
     C --> V[vary-cybernetics]
-    V --> H[conjecture-hypothesis]
+    V --> W[write-conjecture]
+    W --> H[conjecture-hypothesis]
     V --> E[refute-experiment]
     P --> E
     H --> L[loop-research]

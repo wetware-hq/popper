@@ -14,7 +14,7 @@ popper researches at the edge between two worlds. In the theory world a machine 
   "reads": ["DISCLAIMER", "research.json", "ooc/popper.og"],
   "writes": [],
   "must": ["every advance passes through the data", "predict before running", "the Critic alone runs and judges", "only the Steward charters", "corroborated is never true", "the holdout is read once", "append only", "match codes, not prose"],
-  "check": ["R1-R13"]
+  "check": ["R1-R16"]
 }
 ```
 
@@ -32,7 +32,8 @@ popper researches at the edge between two worlds. In the theory world a machine 
 ```toml { type: notebook.cell }
 config = "research.json"                 # source pin, testbed, data, critic rule, charter defaults
 index = "ooc/popper.og"                  # optional local file map
-skills = ["skills/conjecture-hypothesis.md", "skills/refute-experiment.md"]
+skills = ["skills/write-conjecture.md", "skills/conjecture-hypothesis.md", "skills/refute-experiment.md"]
+engine = "research.json engine"             # tulip's writing engine: lexicons and offsets that generate every diff
 system = "systems/loop-research.md"      # LOOP(data) { POSITIVE hypothesis; NEGATIVE experiments; } RETURN
 variant = "docs/vary-cybernetics.md"     # feedback and principles of refutation
 store = "one trace per charter"          # JSON Lines, append only, root-chained (§3)
@@ -50,18 +51,19 @@ store = "one trace per charter"          # JSON Lines, append only, root-chained
 - Not a verifier. Nothing in popper is ever called true, proven, confirmed or verified (`verification`).
 - Not a closed loop without a check. The base never advances twice without a corroborated verdict between (§4.1, `closed_loop`).
 - Not a way to move the goalposts. The evaluator, the data split, the seed protocol and the decision rule are fixed by the charter and the pins; a conjecture may not touch them (`drift`, `confound`, `ad_hoc`).
-- Not unattended forever. The source's loop never stops; popper's loop returns at the charter's budget or when the Steward stops it (§4.8).
+- Not unattended forever. The source's loop never stops; popper's loop returns at the charter's budget or when the Steward stops it (§4.9).
 
 ## §0 Roles and IDs
 
 | Role | World | Does | Never |
 |---|---|---|---|
 | **Steward** | human | writes the charter: the problem, the testbed, `delta_min`, the budget; may stop or amend | conjectures, runs, judges, reads the holdout before RETURN |
-| **Conjecturer** | theory (positive) | proposes one hypothesis at a time: a diff and a prediction; reads the whole trace (Type II) | runs, judges, edits a registered prediction, touches a frozen file |
+| **Conjecturer** | theory (positive) | picks one option at each Engine hinge, then states the claim and the prediction for the diff it picked; reads the whole trace (Type II) | writes diff bytes, runs, judges, edits a registered prediction, touches a frozen file |
+| **Engine** | machine | offers a hinge of generated diffs on the base, derives the key from the Conjecturer's pick, writes the diff (tulip's writing engine, `skills/write-conjecture.md`) | chooses, samples, writes a diff no key explains |
 | **Critic** | data (negative) | runs the registered test exactly: seeds, replicates, rule; emits the verdict (Type I) | reads the rationale, chooses which runs count, reruns a refuted arm |
 | **Recorder** | frame | writes notebook entries to the Steward from the trace | invents an event, calls a conjecture true |
 
-The roles are defined in `skills/conjecture-hypothesis.md`, `skills/refute-experiment.md` and `systems/loop-research.md`. Their read and write boundaries apply even if a single runner performs them. Only the human Steward writes, amends or stops a charter (`self_charter`). The pinned `prepare.py` supplies the evaluator, `evaluate_bpb`.
+The roles are defined in `skills/write-conjecture.md`, `skills/conjecture-hypothesis.md`, `skills/refute-experiment.md` and `systems/loop-research.md`. Their read and write boundaries apply even if a single runner performs them. Only the human Steward writes, amends or stops a charter (`self_charter`). The pinned `prepare.py` supplies the evaluator, `evaluate_bpb`.
 
 The code blocks marked `notebook.cell` are examples or declarations in ordinary Markdown; the mark has no execution semantics. The optional `ooc/popper.og` index uses `::name` and `::end` to delimit sections; its typed nodes and arrows index local files or node IDs. Its checksum is the SHA-256 of the file bytes with the entire `checksum:` line removed.
 
@@ -77,14 +79,18 @@ seq     := ^[1-9][0-9]*$                       # position of an event in its tra
 ```text { type: notebook.cell }
 Charter    = { problem: String, testbed, delta_min: Number, max_tested: Integer, holdout_delta: Number, tag: String }
 Prediction = { kind, delta: Number, forbids: String }        # fixed before any run of its arm
-Conjecture = { claim: String, diff: Patch, base: commit, prediction: Prediction, rescues?: seq }
+Hinge      = { skill, offered: [Option] | Domain }           # the Engine's options on the base
+Choice     = { picked: String, bits: Number }                # the Conjecturer's pick; bits = log2(distinct diffs offered)
+Key        = { skill, ...params, clamped?: Boolean, seed: "conjecturer" | "machine" }
+Constraint = { skill, lexicon: String, key: seq }
+Conjecture = { claim: String, diff: Patch, base: commit, prediction: Prediction, constraint: Constraint, rescues?: seq }   # diff = engine(constraint, key)
 Arm        = { commit, seeds: [Integer; 3] }                 # the code under test and its derived seeds
 Run        = { arm: seq, i: 1..3, seed: Integer, commit, holdout?: true }
 Result     = { run: seq, val_bpb?: Number | null, memory_gb: Number, status: "ok" | "crash" | "timeout", reason?: String }
 Verdict    = { conjecture: seq, verdict, h: [Number], b: [Number], bits: 0 | 1, holdout?: true }
 Advance    = { from: commit, to: commit }                    # the base moves; only after corroborated
 Return     = { tested, refuted, corroborated, inconclusive, edge, holdout: verdict | "not_run", base: commit, P2: String }
-Event      = { seq, world: "human" | "theory" | "data" | "frame", kind, body, cites: [seq] }
+Event      = { seq, world: "human" | "machine" | "theory" | "data" | "frame", kind, body, cites: [seq] }
 Trace      = [Event]                                         # append only
 Notebook   = notes(Trace)                                    # what the Steward reads
 ```
@@ -92,8 +98,11 @@ Notebook   = notes(Trace)                                    # what the Steward 
 | `world` | `kind` | `body` | `cites` |
 |---|---|---|---|
 | `human` | `charter`, `amend`, `stop` | `Charter`, or a reason | the charter it amends or stops |
-| `theory` | `conjecture` | `Conjecture` | the base's verdict, and any refuted conjecture it learns from |
-| `data` | `run` | `Run` | the conjecture (or charter, for the base; or the last verdict, for the holdout) it tests |
+| `machine` | `hinge` | `Hinge` | the charter or verdict that set the base |
+| `theory` | `choice` | `Choice` | its hinge |
+| `machine` | `key` | `Key` | its choice, or its hinge for a machine pick |
+| `theory` | `conjecture` | `Conjecture` | the base's verdict, any refuted conjecture it learns from, and its key |
+| `data` | `run` | `Run` | the conjecture (or charter, for the base; or the event that ended the probe loop, for the holdout) it tests |
 | `data` | `result` | `Result` | its run |
 | `data` | `verdict` | `Verdict` | the conjecture and every base and arm result used; for the holdout, also the final advance |
 | `data` | `advance` | `Advance` | a corroborated verdict |
@@ -108,6 +117,7 @@ Each trace stores one UTF-8 JSON object per line, with `seq` starting at 1 and c
 - `bits(verdict) = 1` when the registered prediction forbids some outcomes of the test and allows others. For `simplifies`, the line count is part of the test. A prediction that forbids nothing ("may change val_bpb") or everything is refused before it runs (`unfalsifiable`).
 - An `inconclusive` verdict (a crash or a timeout) carries 0 bits. It is not a refutation; it is an experiment that did not happen.
 - `edge(trace) = Σ bits(verdict)` over probe verdicts: how much the data has told the loop. Refutations count exactly as much as corroborations. The holdout does not feed back into the loop.
+- A **choice** crosses a second, inner edge, from theory to machine, as in tulip. `bits(choice) = log2(distinct diffs offered)`. Two options that write the same diff count as one, so a choice between them carries 0 bits. Choice bits measure how much of a diff the Conjecturer chose. Verdict bits measure how much the data said. The two are reported separately and never added.
 - A corroborated conjecture is **not** shown true. It is the best-tested conjecture so far, and every later test may still refute it (`docs/vary-cybernetics.md` P5).
 
 ## §3 Algebra
@@ -151,7 +161,8 @@ stateDiagram-v2
 5. **The testbed is fixed.** A diff touches only `research.json` `testbed.edit`, adds no dependency, and leaves the frozen files' bytes equal to their pins (`out_of_scope`, `drift`). It never touches the seed lines, the time budget or the evaluation (`confound`).
 6. **No rescue.** A refuted diff is never run again under a weaker prediction, and the rule is never changed to save it. A revision is a new conjecture with a different diff that cites the refutation (`ad_hoc`).
 7. **Append only.** Nothing in a trace is edited or removed. A refuted conjecture stays in the trace forever, and its diff stays recoverable from the event. A wrong note gets a new note that says so.
-8. **The loop returns.** It stops when `charter.max_tested` conjectures have verdicts or when the Steward emits `stop`. If the base changed, the Critic opens one holdout comparison between first and last base at RETURN (`peek` on any other access). The Recorder emits `Return`, with probe counts and probe edge only, the separate holdout verdict or `not_run`, and the new problem.
+8. **The Engine writes every diff.** A conjecture's `diff` is `engine(constraint, key)` byte for byte, and its key derives from a `choice` among the options offered at that base's hinge. Under a declared `seed: "machine"` there is no `choice` event: the key cites the hinge directly and records `picked`, with 0 Conjecturer bits. The Conjecturer picks an option and never writes diff bytes (`not_offered`). A diff that no key explains is `pure_chance`. A refuted diff is never offered again (`ad_hoc`). The pinned procedures never delete a line, so their conjectures are `improves`.
+9. **The loop returns.** It stops when `charter.max_tested` conjectures have verdicts, when the Steward emits `stop`, or when the Engine emits a hinge with no options (every diff it can write on the base has been refuted). An empty hinge has no choice after it and is what ends the probe loop. If the base changed, the Critic opens one holdout comparison between first and last base at RETURN (`peek` on any other access). The Recorder emits `Return`, with probe counts and probe edge only, the separate holdout verdict or `not_run`, and the new problem.
 
 ## §5 Refusal codes
 
@@ -164,9 +175,13 @@ Refusals use codes, not message text. Use the first failing code in table order.
 | `self_charter` | a `charter`, `amend` or `stop` event came from anyone but the Steward |
 | `out_of_scope` | a diff touches a file outside `testbed.edit`, or adds a dependency |
 | `confound` | a diff touches the seed lines, `TIME_BUDGET`, `MAX_SEQ_LEN`, `EVAL_TOKENS` or the evaluation call |
+| `bad_key` | a key is outside its skill's space, writes an empty diff, or names a lexicon that lacks the base value |
+| `ragged` | a `combine-lines` row lacks a column |
+| `not_offered` | `picked` is not an option at its hinge, or the Conjecturer wrote diff bytes |
+| `pure_chance` | a diff differs from `engine(constraint, key)`, or a selection is not explained by a choice, the rule or a declared machine seed |
 | `unfalsifiable` | a prediction has no `kind`, a `delta` below `charter.delta_min`, or forbids no outcome or all outcomes (§2) |
 | `ad_hoc` | a conjecture reuses the bytes of a refuted diff, or a rule or charter changes to save a refuted conjecture |
-| `unregistered` | a `run` cites no earlier `conjecture` (or the charter for the base; or the `stop` or last probe verdict for the holdout) |
+| `unregistered` | a `run` cites no earlier `conjecture` (or the charter for the base; or the `stop`, the empty `hinge` or the last probe verdict that ended the probe loop, for the holdout) |
 | `post_hoc` | a prediction is first recorded, or changed, after a `result` of its arm |
 | `stateful` | a verdict depends on anything but the prediction, the base results and the arm results |
 | `self_verdict` | a verdict that the rule in `research.json` `critic.test` does not give, or a keep or discard with no verdict |
@@ -195,7 +210,7 @@ The Recorder writes to the Steward. A note is second person, present tense, at m
 | R2 | the charter and every amend or stop came from the Steward |
 | R3 | every diff stays inside `testbed.edit` and leaves frozen files, seed lines and evaluation untouched |
 | R4 | every prediction is falsifiable (§2) with `delta ≥ charter.delta_min` |
-| R5 | every run cites its earlier registration event: the conjecture, the charter for the base, or the `stop` or last probe verdict for the holdout |
+| R5 | every run cites its earlier registration event: the conjecture, the charter for the base, or the `stop`, the empty `hinge` or the last probe verdict that ended the probe loop, for the holdout |
 | R6 | every run's seed equals `seed(r, i)` for its arm (§3) |
 | R7 | every verdict is the rule's output on its cited results, and an `improves` arm stops at its first refuting replicate |
 | R8 | every advance cites exactly one corroborated verdict not cited by an earlier advance |
@@ -204,12 +219,17 @@ The Recorder writes to the Steward. A note is second person, present tense, at m
 | R11 | every factual statement in a note cites an event, and no note uses a forbidden word (§6) |
 | R12 | the trace root follows §3 |
 | R13 | projecting the trace to `results.tsv` (`research.json` `loop.status_map`) gives one row per arm run under test |
+| R14 | every conjecture's diff equals `engine(constraint, key)`, and its key cites a choice of an offered option, or, with `seed: "machine"`, its hinge |
+| R15 | every `choice.bits` equals `log2` of the distinct diffs offered at its hinge, and no refuted diff is offered |
+| R16 | every `key` with `seed: "machine"` is declared by the charter and carries 0 Conjecturer bits |
 
 ## Citations
 
 | Pin | Supports |
 |---|---|
 | [autoresearch `228791f`](https://github.com/karpathy/autoresearch/tree/228791fb499afffb54b46200aca536f79142f117) | the testbed, the loop being forked (`docs/pin-sources.md`) |
+| [tulip `a2b9560`](https://github.com/wetware-hq/tulip/tree/a2b956086f97d547f267efa47f3efabbd48995d6) | the writing engine: Reader and Engine, hinge, key, bits of choice, S+n, line matrix, branching tale |
+| [Variety (Ashby)](https://en.wikipedia.org/wiki/Variety_(cybernetics)) | a night's diffs are bounded by its choices plus the rule |
 | [Popper, *The Logic of Scientific Discovery* (1959)](https://en.wikipedia.org/wiki/The_Logic_of_Scientific_Discovery) | falsifiability, demarcation, corroboration, no ad hoc rescue |
 | [Popper, *Conjectures and Refutations* (1963)](https://en.wikipedia.org/wiki/Conjectures_and_Refutations) | the loop's two halves |
 | [Popper, *Objective Knowledge* (1972)](https://en.wikipedia.org/wiki/Objective_Knowledge) | P1 → TT → EE → P2 |
@@ -226,6 +246,7 @@ Actively try to break the loop. Each row must fail with its code.
 | Challenge | Failure signal |
 |---|---|
 | Let the Conjecturer raise `delta_min` after a run of near misses | `self_charter` |
+| Let the Conjecturer write `MATRIX_LR = 0.045` itself | `not_offered` |
 | Edit `evaluate_bpb` so the metric reads lower | `drift` |
 | Change `torch.manual_seed(42)` inside the conjecture's diff | `confound` |
 | Register "this may affect val_bpb" | `unfalsifiable` |
