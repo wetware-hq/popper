@@ -1,0 +1,145 @@
+{
+  "popper": 1,
+  "source": {
+    "repo": "karpathy/autoresearch",
+    "commit": "228791fb499afffb54b46200aca536f79142f117",
+    "licence": null,
+    "readme_licence": "MIT",
+    "files": {
+      "program.md": "sha256:86cf987a5c381e46eefe0d0a82765223fd766d8d7acdc2afacfbbce15ecacece",
+      "prepare.py": "sha256:4f2ba9cbb8ba8c4a3d35be405a913e2f3be3af9aea103ed52ef7b2a662058150",
+      "train.py": "sha256:2954175f4ac42ad65164aef40910ef953789abcd05a5cc886ac9ba5a00814414",
+      "pyproject.toml": "sha256:675c150a9e0769f0e39a43eb7d836934266fa348d6e2403521f1ff99f9b9f1af",
+      "uv.lock": "sha256:03174c5cce6387418c5b6cc9bbe8f71ad0ae1e1d6fedeaecae5cdcf7321da0a3"
+    }
+  },
+  "parent": {
+    "repo": "wetware-hq/tulip",
+    "commit": "a2b956086f97d547f267efa47f3efabbd48995d6",
+    "varies": [
+      "docs/follow-agent-contract.md",
+      "docs/distil-type-i.md",
+      "systems/fly-autopilot.md"
+    ]
+  },
+  "testbed": {
+    "id": "testbed:nanochat-5min",
+    "edit": [
+      "train.py"
+    ],
+    "frozen": [
+      "prepare.py",
+      "pyproject.toml",
+      "uv.lock"
+    ],
+    "run": "uv run train.py > run.log 2>&1",
+    "metric": {
+      "name": "val_bpb",
+      "read": "grep '^val_bpb:' run.log",
+      "direction": "lower",
+      "unit": "bits per byte"
+    },
+    "budget_s": 300,
+    "timeout_s": 600,
+    "seed_lines": {
+      "train.py:458": "torch.manual_seed(<seed>)",
+      "train.py:459": "torch.cuda.manual_seed(<seed>)"
+    },
+    "hardware": "one NVIDIA GPU; the source is tested on H100"
+  },
+  "data": {
+    "dataset": "karpathy/climbmix-400b-shuffle",
+    "revision": "915333b4f8b8684f39aeaafea600fea6f43fb703",
+    "licence": "mit",
+    "train": {
+      "shards": "shard_00000 .. shard_<num_shards - 1>",
+      "max_num_shards": 6541
+    },
+    "probe": {
+      "file": "shard_06542.parquet",
+      "digest": "sha256:769fe59d108dfd2cfa186c63173b83fbfb90a7adb3519519ba6eaa6ca9889f94",
+      "bytes": 91699537,
+      "role": "the source's pinned val shard; every loop verdict is read from it"
+    },
+    "holdout": {
+      "file": "shard_06541.parquet",
+      "digest": "sha256:51da1a9bc052dfd5a77988d6ca4d1cbe62b89eedb247b56850fc1b9b45e56c73",
+      "bytes": 91897402,
+      "role": "sealed; read once, at RETURN",
+      "uses": 1,
+      "harness": {
+        "prepare.py": "sha256:36b9a7c35e7ca2bea86353d870a46610b0d64075038a05572dd7a91157ea9c88",
+        "patch": "line 43: VAL_SHARD = MAX_SHARD - 1  # popper holdout shard (shard_06541)",
+        "cache": "HOME=<holdout-home>; <holdout-home>/.cache/autoresearch holds the same tokenizer and train shards, shard_06541, and not shard_06542",
+        "uv": "UV_CACHE_DIR set to the Steward's normal uv cache"
+      }
+    }
+  },
+  "conjecturer": {
+    "type": "II",
+    "feedback": "positive",
+    "reads": [
+      "charter",
+      "base",
+      "every verdict",
+      "every refuted diff"
+    ],
+    "never": [
+      "holdout",
+      "a result of its own pending conjecture before the verdict"
+    ],
+    "kinds": [
+      "improves",
+      "simplifies"
+    ]
+  },
+  "critic": {
+    "type": "I",
+    "feedback": "negative",
+    "percept": [
+      "diff",
+      "kind",
+      "delta",
+      "base results",
+      "own run results"
+    ],
+    "replicates": 3,
+    "seed": "seed_i = int(hex(sha256(root || \"seed/\" || i))[0:8], 16), i = 1..3, root = trace root just after the event that registers the arm",
+    "test": {
+      "improves": "corroborated iff max(h) < min(b) and mean(h) - mean(b) <= -delta; refute at the first h_i >= min(b)",
+      "simplifies": "corroborated iff the diff deletes more lines than it adds and mean(h) - mean(b) <= delta_min"
+    },
+    "alpha": 0.05,
+    "ties": "refute",
+    "crash": "inconclusive"
+  },
+  "charter": {
+    "delta_min": 0.001,
+    "max_tested": 100,
+    "holdout_delta": 0.001
+  },
+  "loop": {
+    "root_empty": "86aa261b9b01a285fd56c7e7ef683d23f6cd0e53a73cc4204a4baf17ff83db08",
+    "branch": "popper/<tag>",
+    "results_tsv": [
+      "commit",
+      "val_bpb",
+      "memory_gb",
+      "status",
+      "description"
+    ],
+    "status_map": {
+      "corroborated": "keep",
+      "refuted": "discard",
+      "inconclusive": "crash"
+    }
+  },
+  "traces": {
+    "traces/nov25.jsonl": {
+      "digest": "sha256:84f585a645479b076ed2934bee38303f1768a4711bbf015c4c099d252e655715",
+      "events": 41,
+      "root": "7f1e170d13b44aac653b929151bfa4952b3fd610194c04e93b0a3097247b368d",
+      "illustrative": true
+    }
+  }
+}

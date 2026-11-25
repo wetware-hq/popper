@@ -1,0 +1,152 @@
+::meta
+title: popper route and file index
+version: 1
+updated: 2026-11-25
+domain: popper|auto-research|falsifiability|cybernetics
+scope: all
+governs: docs/follow-agent-contract.md
+checksum: sha256:32e479b949ec20e79ba35b29c67e07250d8bb20bb55ba3416ff30f8a76a0b102
+::end
+
+::schema
+node-types: [stage, skill, system, assertion, meta]
+edge-types: [requires, precedes, composes, refuses]
+scope-levels: [all, steward, conjecturer, critic, recorder]
+::end
+
+::index
+# id | type | scope | conf | keywords
+banner | meta | all | 1.00 | academic, tentative, steward-only-charters
+contract | stage | all | 1.00 | worlds, edge, verdict-bit, trace, flow-laws, codes, notebook-grammar, predicates
+pins | stage | all | 1.00 | source-commit, digest, unlicensed-cite-only, probe-shard, holdout-shard, harness
+vary | stage | all | 1.00 | positive-feedback, negative-feedback, second-order, demarcation, asymmetry, ad-hoc, corroboration
+conjecture | skill | conjecturer | 1.00 | type-ii, one-change, kind, delta, forbids, bold, rescues
+refute | skill | critic | 1.00 | type-i, derived-seeds, three-replicates, first-counter-instance, dominance, 1-in-20, advance
+loop | system | recorder | 1.00 | charter, base, LOOP-data, notes, max-tested, holdout-once, P2, replay
+stop | assertion | all | 1.00 | return, holdout-read, P2
+__changelog | meta | all | 1.00 | changes, version
+::end
+
+::node [id=banner type=meta confidence=1.00 scope=all updated=2026-11-25]
+::dense
+academic|tentative|steward-only-charters
+::end
+::warning
+Read DISCLAIMER before any node.
+::end
+::edges
+->[:precedes] contract
+::end
+::end
+
+::node [id=contract type=stage confidence=1.00 scope=all updated=2026-11-25]
+::dense
+steward|conjecturer|critic|recorder|verdict-bit|trace-root|closed-loop|unfalsifiable|ad-hoc|peek|R1-R13
+::end
+::full
+Load docs/follow-agent-contract.md.
+::end
+::edges
+->[:requires] docs/follow-agent-contract.md
+->[:precedes] pins
+->[:precedes] vary
+::end
+::end
+
+::node [id=pins type=stage confidence=1.00 scope=all updated=2026-11-25]
+::dense
+karpathy/autoresearch@228791f|climbmix@915333b|probe=shard_06542|holdout=shard_06541|harness=36b9a7c3
+::end
+::full
+Load docs/pin-sources.md. Check every digest in research.json before any run.
+::end
+::edges
+->[:requires] docs/pin-sources.md
+->[:requires] research.json
+->[:precedes] refute
+->[:refuses] unpinned
+->[:refuses] drift
+::end
+::end
+
+::node [id=vary type=stage confidence=1.00 scope=all updated=2026-11-25]
+::dense
+tulip@a2b9560|program.md@228791f|P1-P7|positive=conjecture|negative=refutation|steward=second-order
+::end
+::full
+Load docs/vary-cybernetics.md.
+::end
+::edges
+->[:requires] docs/vary-cybernetics.md
+->[:precedes] conjecture
+->[:precedes] refute
+::end
+::end
+
+::node [id=conjecture type=skill confidence=1.00 scope=conjecturer updated=2026-11-25]
+::dense
+read-all-verdicts|one-diff|train.py-only|kind|delta>=delta_min|forbids|register-before-run
+::end
+::full
+Load skills/conjecture-hypothesis.md.
+::end
+::edges
+->[:requires] skills/conjecture-hypothesis.md
+->[:precedes] refute
+->[:refuses] out_of_scope
+->[:refuses] confound
+->[:refuses] unfalsifiable
+->[:refuses] ad_hoc
+::end
+::end
+
+::node [id=refute type=skill confidence=1.00 scope=critic updated=2026-11-25]
+::dense
+seed(r,i)|3-replicates|stop-at-first-h>=min(b)|mean-gain>=delta|inconclusive=0-bits|advance
+::end
+::full
+Load skills/refute-experiment.md.
+::end
+::edges
+->[:requires] skills/refute-experiment.md
+->[:requires] research.json
+->[:composes] loop
+->[:refuses] stateful
+->[:refuses] self_verdict
+->[:refuses] closed_loop
+::end
+::end
+
+::node [id=loop type=system confidence=1.00 scope=recorder updated=2026-11-25]
+::dense
+charter|base-x3|LOOP(data)|note-per-verdict|max_tested|RETURN|holdout-once|traces/nov25.jsonl
+::end
+::full
+Load systems/loop-research.md.
+::end
+::edges
+->[:requires] systems/loop-research.md
+->[:requires] traces/nov25.jsonl
+->[:precedes] stop
+->[:refuses] verification
+->[:refuses] peek
+::end
+::end
+
+::node [id=stop type=assertion confidence=1.00 scope=all updated=2026-11-25]
+::dense
+return|holdout-read|P2
+::end
+::assertion
+trigger: verdicts = charter.max_tested OR Steward stop
+check: holdout read once by the Critic; last event kind = return with P2; R1-R13
+on-pass: halt
+on-fail: ->[:requires] contract
+::end
+::end
+
+::node [id=__changelog type=meta confidence=1.00 scope=all updated=2026-11-25]
+::dense
+v1|2026-11-25|initial specbase: fork of karpathy/autoresearch varying tulip's cybernetics (WET-137)
+::end
+::end
