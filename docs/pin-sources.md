@@ -47,7 +47,7 @@ Full digests are in `research.json` `source.files`.
 | probe | `shard_06542.parquet` | `769fe59d…9f94` | every loop verdict (the source's pinned val shard) |
 | holdout | `shard_06541.parquet` | `51da1a9b…3c73` | RETURN only, once (`peek`) |
 
-`prepare.py` downloads shards `0 … num_shards − 1` plus the val shard, so `shard_06541` is never downloaded or trained on while `num_shards ≤ 6541`. A Steward who sets `--num-shards -1` trains on the holdout and must choose another (`unpinned` until pinned).
+`prepare.py` downloads shards `0 … num_shards − 1` plus the val shard, so `shard_06541` is never downloaded or trained on while `num_shards ≤ 6541`. A Steward who sets `--num-shards -1` trains on the holdout and must choose another (`unpinned` until pinned). A bounded rerun of `prepare.py` does not delete shards already in the cache, so before every run the Critic also checks that `~/.cache/autoresearch/data` holds no `shard_06541.parquet` (`peek`).
 
 ## The holdout harness
 
