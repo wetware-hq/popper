@@ -28,7 +28,8 @@ This is one research night, from the Steward's charter to the holdout. It compos
 
 ```text { type: notebook.cell }
 charter := Steward                                   # P1; an agent may not write it (self_charter)
-setup:   clone autoresearch at the pin; check every digest (R1); git checkout -b popper/<tag>
+setup:   clone autoresearch at the pin; uv sync; uv run prepare.py --num-shards <n ≤ 6541>   # default 10
+         check every digest (R1); git checkout -b popper/<tag>
 base:    Critic runs the base three times → b      # seeds from the root after the charter
 LOOP(data) {
   POSITIVE: Conjecturer emits one conjecture on the base      # TT
