@@ -11,16 +11,17 @@ This is one research night, from the Steward's charter to the holdout. It compos
   "id": "systems/loop-research.md",
   "type": "system",
   "role": "run a charter to RETURN: base, then conjecture and refutation until the budget, then the holdout once",
-  "reads": ["research.json", "charter", "skills/conjecture-hypothesis.md", "skills/refute-experiment.md"],
+  "reads": ["research.json", "charter", "skills/write-conjecture.md", "skills/conjecture-hypothesis.md", "skills/refute-experiment.md"],
   "writes": ["trace", "results.tsv", "notebook"],
   "must": ["start from a Steward charter", "replicate the base first", "one conjecture under test at a time", "a note after every probe verdict", "stop at max_tested or Steward stop", "compare on the holdout only at RETURN if the base changed", "return P2"],
-  "check": ["R1-R13"]
+  "check": ["R1-R16"]
 }
 ```
 
 ## Graph
 
 - ← [../docs/read-repository.md](../docs/read-repository.md)
+- ← [../skills/write-conjecture.md](../skills/write-conjecture.md)
 - ← [../skills/conjecture-hypothesis.md](../skills/conjecture-hypothesis.md)
 - ← [../skills/refute-experiment.md](../skills/refute-experiment.md)
 
@@ -32,6 +33,7 @@ setup:   prepare the pinned checkout and cache (docs/pin-sources.md)
          create popper/<tag> at source.commit; append the charter as seq 1
 base:    Critic runs the base three times → b      # seeds from the root after the charter
 LOOP(data) {
+  WRITE:    Engine offers a hinge of diffs on the base; Conjecturer picks; Engine writes the diff   # tulip's engine
   POSITIVE: Conjecturer emits one conjecture on the base      # TT
   NEGATIVE: Critic runs it until refuted, inconclusive, or corroborated   # EE
             corroborated → advance; b := h
@@ -54,26 +56,33 @@ RETURN:  if the base changed, Critic compares first base vs last base on the hol
 |---|---|---|---|
 | 1 | human | charter | `delta_min = 0.001`, `max_tested = 3`, `holdout_delta = 0.001`, tag `nov25` |
 | 2–7 | data | run, result | base `228791f` × 3, seeds 618655339, 1770127804, 4035022987: `b = [0.9981, 0.9976, 0.9984]`, `min(b) = 0.9976` |
-| 8 | theory | conjecture | A: `MATRIX_LR` 0.04 → 0.05, `improves`, `delta = 0.002` |
-| 9–10 | data | run, result | seed 1878499161: 0.9979 ≥ 0.9976 |
-| 11 | data | verdict | **refuted** after one run, 1 bit; the base stays |
-| 12 | frame | note | a learning rate of 0.05 is ruled out |
-| 13 | theory | conjecture | B: `WARMDOWN_RATIO` 0.5 → 0.6, `improves`, `delta = 0.001`, cites 11 |
-| 14–19 | data | run, result | `h = [0.9958, 0.9962, 0.9955]`, all below 0.9976; mean gain 0.0022 ≥ 0.001 |
-| 20 | data | verdict | **corroborated**, 1 bit |
-| 21 | data | advance | base := arm B; `b := h`, `min(b) = 0.9955` |
-| 22 | frame | note | B survived one test; it may still fall |
-| 23 | theory | conjecture | C: `DEPTH` 8 → 10, `improves`, `delta = 0.003` |
-| 24–25 | data | run, result | crash: no `val_bpb` line |
-| 26 | data | verdict | **inconclusive**, 0 bits; three tests used |
-| 27 | frame | note | nothing is ruled in or out about depth |
-| 28–39 | data | run, result | holdout: base `228791f` → `[1.0012, 1.0017, 1.0009]`; base B → `[0.9991, 0.9994, 0.9988]` |
-| 40 | data | verdict | holdout **corroborated**: all three below 1.0009, mean gain 0.0022 ≥ 0.001 |
-| 41 | frame | return | tested 3, refuted 1, corroborated 1, inconclusive 1, edge 2 bits, P2 below |
+| 8 | machine | hinge | `substitute-value`, six distinct diffs on the pinned base |
+| 9 | theory | choice | `MATRIX_LR:+1`, `log2 6 ≈ 2.585` bits |
+| 10 | machine | key | `{ constant: MATRIX_LR, n: 1 }` |
+| 11 | theory | conjecture | A: the Engine's diff `MATRIX_LR` 0.04 → 0.05, `improves`, `delta = 0.002` |
+| 12–13 | data | run, result | seed 3968596799: 0.9979 ≥ 0.9976 |
+| 14 | data | verdict | **refuted** after one run, 1 bit; the base stays |
+| 15 | frame | note | a learning rate of 0.05 is ruled out |
+| 16–18 | machine, theory, machine | hinge, choice, key | five diffs, because the refuted one is no longer offered; `WARMDOWN_RATIO:+1`, `log2 5 ≈ 2.322` bits |
+| 19 | theory | conjecture | B: `WARMDOWN_RATIO` 0.5 → 0.6, `improves`, `delta = 0.001`, cites 14 |
+| 20–25 | data | run, result | `h = [0.9958, 0.9962, 0.9955]`, all below 0.9976; mean gain 0.0022 ≥ 0.001 |
+| 26 | data | verdict | **corroborated**, 1 bit |
+| 27 | data | advance | base := arm B; `b := h`, `min(b) = 0.9955` |
+| 28 | frame | note | B survived one test; it may still fall |
+| 29–31 | machine, theory, machine | hinge, choice, key | five diffs on base B; `DEPTH:+1`, 2.322 bits |
+| 32 | theory | conjecture | C: `DEPTH` 8 → 10, `improves`, `delta = 0.003` |
+| 33–34 | data | run, result | crash: no `val_bpb` line |
+| 35 | data | verdict | **inconclusive**, 0 bits; three tests used |
+| 36 | frame | note | nothing is ruled in or out about depth |
+| 37–48 | data | run, result | holdout: base `228791f` → `[1.0012, 1.0017, 1.0009]`; base B → `[0.9991, 0.9994, 0.9988]` |
+| 49 | data | verdict | holdout **corroborated**: all three below 1.0009, mean gain 0.0022 ≥ 0.001 |
+| 50 | frame | return | tested 3, refuted 1, corroborated 1, inconclusive 1, edge 2 bits, P2 below |
 
-The note at seq 22, as written by the Recorder:
+The Conjecturer chose 2.585 + 2.322 + 2.322 ≈ 7.2 bits of diff, and the data returned 2 bits of verdict. The Recorder reports the two numbers separately.
 
-> You see the second conjecture lengthen the warmdown to 0.6 and risk refutation by any run at or above 0.9976 [e13]. All three runs come in below it, at 0.9958, 0.9962 and 0.9955 [e15] [e17] [e19], a mean gain of 0.0022 against the 0.001 it predicts. It is corroborated [e20] and becomes the base [e21]. It survives this test; it may still fall.
+The note at seq 28, as written by the Recorder:
+
+> Of the five diffs the Engine offers [e16] (the refuted one is no longer offered), the Conjecturer picks WARMDOWN_RATIO one step up, 2.322 bits [e17], and the Engine writes 0.5 → 0.6 [e18]. You see the second conjecture lengthen the warmdown to 0.6 and risk refutation by any run at or above 0.9976 [e19]. All three runs come in below it, at 0.9958, 0.9962 and 0.9955 [e21] [e23] [e25], a mean gain of 0.0022 against the 0.001 it predicts. It is corroborated [e26] and becomes the base [e27]. It survives this test; it may still fall.
 
 P2: *Does the warmdown gain survive at ten layers once the batch is halved to fit memory?*
 
@@ -92,7 +101,7 @@ The base and holdout runs are in the trace, not in the TSV.
 
 ## Replay
 
-Run this cell with Node.js from the repository root. It checks the object graph checksum, trace digest and root, and replays the seeds and the four `improves` verdicts in the example. It does not train a model.
+Run this cell with Node.js from the repository root. It checks the object graph checksum, trace digest and root, replays the seeds and the four `improves` verdicts, and checks that every choice's bits match its hinge and every diff is the Engine's `substitute-value` output for its key. It does not train a model.
 
 ```js { type: notebook.cell }
 const assert = require("node:assert/strict");
@@ -136,6 +145,21 @@ for (const [i, event] of events.entries()) {
     assert.equal(body.seed, parseInt(sha(roots[body.arm] + "seed/" + body.i).slice(0, 8), 16));
   }
   if (kind === "advance") baseArm = events[cites[0]].body.conjecture;
+  if (kind === "choice") {
+    assert.equal(events[cites[0]].kind, "hinge");
+    assert.equal(body.bits, Math.round(Math.log2(events[cites[0]].body.offered.size) * 1000) / 1000);
+  }
+  if (kind === "conjecture") {
+    const keyEvent = events[body.constraint.key];
+    assert(cites.includes(body.constraint.key) && events[keyEvent.cites[0]].kind === "choice");
+    const key = keyEvent.body, L = config.engine.lexicons[key.constant];
+    const [, minus, plus] = body.diff.match(/\n-(.*)\n\+(.*)\n$/);
+    const value = line => Number(line.match(/^\w+ = (\S+)/)[1]);
+    const j = L.indexOf(value(minus));
+    assert(j >= 0 && minus.startsWith(key.constant + " = "));
+    assert.equal(value(plus), L[Math.min(Math.max(j + key.n, 0), L.length - 1)]);
+    assert.equal(plus.slice(plus.indexOf("#")), minus.slice(minus.indexOf("#")));
+  }
   if (kind !== "verdict") continue;
   const runOf = r => events[r.body.run].body;
   const results = cites.map(id => events[id]).filter(e => e.kind === "result")
@@ -166,11 +190,12 @@ console.log(`Replayed ${pin.events} events: ${pin.root}`);
 
 | Challenge | Failure signal |
 |---|---|
-| Swap seq 8 and seq 9 | `post_hoc`, and every later root changes |
+| Swap seq 11 and seq 12 | `post_hoc`, and every later root changes |
 | Run a fourth replicate of A | `self_verdict` |
-| Count the crash at seq 25 as a refutation | `self_verdict` (R7) |
-| Read the holdout after seq 21 | `peek` |
+| Count the crash at seq 34 as a refutation | `self_verdict` (R7) |
+| Read the holdout after seq 27 | `peek` |
 | Return "the warmdown schedule is better" | `verification` |
+| Replace the diff at seq 11 with `MATRIX_LR = 0.045` | `pure_chance` |
 
 ## Licence
 
