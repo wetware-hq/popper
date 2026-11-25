@@ -1,4 +1,4 @@
-# popper
+# popper 🍿
 
 **popper** is a standalone cybernetic auto-research specification. In Andrej Karpathy's [autoresearch](https://github.com/karpathy/autoresearch), a change to a small language-model training script stays if it lowers the validation loss. In popper, the Conjecturer says in advance what result would count against the change. The Critic applies that test. Only changes the data fails to refute are kept.
 
