@@ -178,15 +178,22 @@ for (const [i, event] of events.entries()) {
     baseArm = events[cites[0]].body.conjecture;
     const hunks = events[baseArm].body.diff.split("\n@@ ").slice(1).map(h => {
       const [, a, b, c, d] = h.match(/^-(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@/);
-      const plus = h.split("\n").slice(1).filter(l => l[0] === "+").map(l => l.slice(1));
-      return { a: +a, b: b === undefined ? 1 : +b, c: +c, d: d === undefined ? 1 : +d, plus };
+      const body = h.split("\n").slice(1).filter(l => " -+".includes(l[0]));
+      return { a: +a, b: b === undefined ? 1 : +b, c: +c, d: d === undefined ? 1 : +d, body };
     });
     for (const k of Object.keys(knobs)) {
       if (at[k] === null) continue;
       const L = pos[k], hit = hunks.find(h => h.b > 0 && h.a <= L && L < h.a + h.b);
       if (hit) {
-        const p = hit.plus.findIndex(l => l.startsWith(`${k} = `));
-        [at[k], pos[k]] = p < 0 ? [null, null] : [hit.plus[p], hit.c + p];
+        let o = hit.a, n = hit.c, cut = false, kept = null;
+        for (const l of hit.body) {
+          if (l[0] === " " && o === L) kept = [l.slice(1), n];
+          if (l[0] === "-" && o === L) cut = true;
+          if (l[0] === "+" && cut && !kept && l.startsWith(`+${k} = `)) kept = [l.slice(1), n];
+          if (l[0] !== "+") o++;
+          if (l[0] !== "-") n++;
+        }
+        [at[k], pos[k]] = kept ?? [null, null];
       } else pos[k] += hunks.filter(h => (h.b > 0 ? h.a + h.b - 1 : h.a) < L).reduce((s, h) => s + h.d - h.b, 0);
     }
   }
