@@ -75,12 +75,12 @@ The night itself is the tale. Each node is a base, and the night starts at the p
 ```text { type: notebook.cell }
 Hinge  = { skill, offered: [Option] | Domain }          # world: machine; cites the base's charter or verdict
 Choice = { picked: String, bits: Number }               # world: theory; cites the hinge
-Key    = { skill, ...key, clamped?: Boolean, seed: "conjecturer" | "machine" }  # world: machine; cites the choice
+Key    = { skill, ...key, clamped?: Boolean, seed: "conjecturer" | "machine", picked?: String }  # world: machine; cites the choice, or the hinge for a machine pick
 ```
 
 Next comes the `conjecture` event. It cites the key and carries `constraint: { skill, lexicon, key: seq }`, and its `diff` must equal `engine(constraint, key)` byte for byte (`pure_chance`).
 
-- **Declared clinamen.** When the charter sets `engine.seed = "machine"`, the Engine itself picks option `seed(r, "key") mod size`. Here `r` is the root just after the hinge. The key carries `seed: "machine"` and 0 Conjecturer bits, and the Recorder calls it a swerve the Conjecturer did not make.
+- **Declared clinamen.** When the charter sets `engine.seed = "machine"`, the Engine itself picks option `seed(r, "key") mod size`. Here `r` is the root just after the hinge. No `choice` event is written. The key cites the hinge, carries `seed: "machine"`, the `picked` option and 0 Conjecturer bits, and the Recorder calls it a swerve the Conjecturer did not make.
 - **Requisite variety.** The diffs a night can test are bounded by its choices plus the rule (Ashby). A diff that no offered option explains reveals a hidden source of choice (`pure_chance`).
 
 ## Worked example

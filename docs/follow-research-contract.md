@@ -100,7 +100,7 @@ Notebook   = notes(Trace)                                    # what the Steward 
 | `human` | `charter`, `amend`, `stop` | `Charter`, or a reason | the charter it amends or stops |
 | `machine` | `hinge` | `Hinge` | the charter or verdict that set the base |
 | `theory` | `choice` | `Choice` | its hinge |
-| `machine` | `key` | `Key` | its choice |
+| `machine` | `key` | `Key` | its choice, or its hinge for a machine pick |
 | `theory` | `conjecture` | `Conjecture` | the base's verdict, any refuted conjecture it learns from, and its key |
 | `data` | `run` | `Run` | the conjecture (or charter, for the base; or the last verdict, for the holdout) it tests |
 | `data` | `result` | `Result` | its run |
@@ -161,7 +161,7 @@ stateDiagram-v2
 5. **The testbed is fixed.** A diff touches only `research.json` `testbed.edit`, adds no dependency, and leaves the frozen files' bytes equal to their pins (`out_of_scope`, `drift`). It never touches the seed lines, the time budget or the evaluation (`confound`).
 6. **No rescue.** A refuted diff is never run again under a weaker prediction, and the rule is never changed to save it. A revision is a new conjecture with a different diff that cites the refutation (`ad_hoc`).
 7. **Append only.** Nothing in a trace is edited or removed. A refuted conjecture stays in the trace forever, and its diff stays recoverable from the event. A wrong note gets a new note that says so.
-8. **The Engine writes every diff.** A conjecture's `diff` is `engine(constraint, key)` byte for byte, and its key derives from a `choice` among the options offered at that base's hinge. The Conjecturer picks an option and never writes diff bytes (`not_offered`). A diff that no key explains is `pure_chance`. A refuted diff is never offered again (`ad_hoc`). The pinned procedures never delete a line, so their conjectures are `improves`.
+8. **The Engine writes every diff.** A conjecture's `diff` is `engine(constraint, key)` byte for byte, and its key derives from a `choice` among the options offered at that base's hinge. Under a declared `seed: "machine"` there is no `choice` event: the key cites the hinge directly and records `picked`, with 0 Conjecturer bits. The Conjecturer picks an option and never writes diff bytes (`not_offered`). A diff that no key explains is `pure_chance`. A refuted diff is never offered again (`ad_hoc`). The pinned procedures never delete a line, so their conjectures are `improves`.
 9. **The loop returns.** It stops when `charter.max_tested` conjectures have verdicts, when the Steward emits `stop`, or when the Engine emits a hinge with no options (every diff it can write on the base has been refuted). An empty hinge has no choice after it and is what ends the probe loop. If the base changed, the Critic opens one holdout comparison between first and last base at RETURN (`peek` on any other access). The Recorder emits `Return`, with probe counts and probe edge only, the separate holdout verdict or `not_run`, and the new problem.
 
 ## §5 Refusal codes
@@ -219,7 +219,7 @@ The Recorder writes to the Steward. A note is second person, present tense, at m
 | R11 | every factual statement in a note cites an event, and no note uses a forbidden word (§6) |
 | R12 | the trace root follows §3 |
 | R13 | projecting the trace to `results.tsv` (`research.json` `loop.status_map`) gives one row per arm run under test |
-| R14 | every conjecture's diff equals `engine(constraint, key)`, and its key cites a choice of an offered option |
+| R14 | every conjecture's diff equals `engine(constraint, key)`, and its key cites a choice of an offered option, or, with `seed: "machine"`, its hinge |
 | R15 | every `choice.bits` equals `log2` of the distinct diffs offered at its hinge, and no refuted diff is offered |
 | R16 | every `key` with `seed: "machine"` is declared by the charter and carries 0 Conjecturer bits |
 
