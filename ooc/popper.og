@@ -5,7 +5,7 @@ updated: 2026-11-25
 domain: popper|auto-research|falsifiability|cybernetics
 scope: all
 governs: docs/follow-agent-contract.md
-checksum: sha256:32e479b949ec20e79ba35b29c67e07250d8bb20bb55ba3416ff30f8a76a0b102
+checksum: sha256:3f6147f79dfc5e0d0bee7f9da1fb99a0975575f44b8e2281dd35d27304a65235
 ::end
 
 ::schema
@@ -138,7 +138,7 @@ Load systems/loop-research.md.
 return|holdout-read|P2
 ::end
 ::assertion
-trigger: verdicts = charter.max_tested OR Steward stop
+trigger: verdicts >= charter.max_tested OR Steward stop
 check: holdout read once by the Critic; last event kind = return with P2; R1-R13
 on-pass: halt
 on-fail: ->[:requires] contract
