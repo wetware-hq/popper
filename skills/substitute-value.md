@@ -48,7 +48,9 @@ The Engine writes every diff the Conjecturer does not declare as its own. It is 
 ## Procedure
 
 ```text { type: notebook.cell }
-at(k)       := line k of train.py at the base (after every advance, the advanced line)
+at(k)       := the line of knob k in train.py at the base; L := its line number there
+               (every advance, verbatim or not, carries it through the diff: a changed line
+               is re-read from the + side, and hunks above it shift L by their net lines)
 j(k)        := index of at(k)'s value in ladder(k)
 rewrite(k,v):= "<k> = <v>", then spaces up to the column of "#" in at(k) (at least one), then the comment
 move(k, n)  := "--- a/train.py\n+++ b/train.py\n@@ -L +L @@\n-" at(k) "\n+" rewrite(k, ladder(k)[j(k)+n]) "\n"
@@ -56,8 +58,8 @@ offered     := [move(k, n) for k in engine.knobs order, for n ascending,
                 n ≠ 0, 0 ≤ j(k)+n < |ladder(k)|, move(k, n) not the bytes of a refuted diff]
 ```
 
-1. **Offer.** Build `offered` at the current base. A refuted diff is not offered again (`ad_hoc`); the same move on a later base has the same bytes while its line is unchanged, so it stays excluded.
-2. **Take the pick.** With `seed: "conjecturer"` the Conjecturer names `(knob, n)`; it must be in `offered` (`bad_key`, `ad_hoc`). With `seed: "root"` the Engine takes `offered[int(hex(sha256(r || "engine"))[0:8], 16) mod |offered|]`, where `r` is the trace root just before the conjecture.
+1. **Offer.** Build `offered` at the current base. A knob whose value at the base is not on its ladder (a `verbatim` edit moved it off), or whose line a diff removed, offers no moves until the Steward amends its ladder. A refuted diff is not offered again (`ad_hoc`); the same move on a later base has the same bytes while its line is unchanged, so it stays excluded.
+2. **Take the pick.** With `seed: "conjecturer"` the Conjecturer names `(knob, n)`; it must be in `offered` (`bad_key`, `ad_hoc`). If `offered` is empty, no `substitute-value` key is valid (`bad_key`), not even `seed: "root"`; the Conjecturer may declare `verbatim` or has no move, and the loop returns (contract §4.8). With `seed: "root"` the Engine takes `offered[int(hex(sha256(r || "engine"))[0:8], 16) mod |offered|]`, where `r` is the trace root just before the conjecture.
 3. **Write.** The diff is `move(knob, n)`, byte for byte. Any other bytes under this procedure are `pure_chance`.
 4. **Count.** `key.offered = |offered|`. `key.bits = log2(|offered|)` rounded to three decimals for `seed: "conjecturer"`, and `0` for `seed: "root"`.
 

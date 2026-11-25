@@ -37,7 +37,7 @@ LOOP(data) {
   NEGATIVE: Critic runs it until refuted, inconclusive, or corroborated   # EE
             corroborated → advance; b := h
   Recorder emits one note citing the conjecture, results, verdict, advance
-} until verdicts ≥ charter.max_tested or Steward emits stop
+} until verdicts ≥ charter.max_tested, Steward emits stop, or the Conjecturer has no move
 RETURN:  if the base changed, Critic compares first base vs last base on the holdout
          Recorder emits return { tested, refuted, corroborated, inconclusive, edge, selection, holdout, base, P2 }
 ```
@@ -135,14 +135,17 @@ const rewrite = (text, v) => {
 };
 const patch = (n, a, b) => `--- a/train.py\n+++ b/train.py\n@@ -${n} +${n} @@\n-${a}\n+${b}\n`;
 const at = Object.fromEntries(Object.entries(knobs).map(([k, v]) => [k, v.text]));
+const pos = Object.fromEntries(Object.entries(knobs).map(([k, v]) => [k, v.line]));
+const rung = k => at[k] === null ? -1 : knobs[k].ladder.indexOf(at[k].match(line)?.[2]);
 const refuted = new Set();
 const move = (knob, n) => {
-  const { ladder } = knobs[knob], j = ladder.indexOf(at[knob].match(line)[2]);
+  const { ladder } = knobs[knob], j = rung(knob);
   assert(j >= 0 && ladder[j + n] !== undefined && n !== 0);                   // bad_key
-  return patch(knobs[knob].line, at[knob], rewrite(at[knob], ladder[j + n]));
+  return patch(pos[knob], at[knob], rewrite(at[knob], ladder[j + n]));
 };
 const offered = () => Object.keys(knobs).flatMap(k => {
-  const j = knobs[k].ladder.indexOf(at[k].match(line)[2]);
+  const j = rung(k);
+  if (j < 0) return [];                                                       // off its ladder
   return knobs[k].ladder.map((_, x) => x - j).filter(n => n !== 0).map(n => move(k, n));
 }).filter(d => !refuted.has(d));
 let selection = 0;
@@ -156,6 +159,7 @@ for (const [i, event] of events.entries()) {
     if (key.procedure === "substitute-value") {
       const offer = offered();
       assert.equal(key.offered, offer.length);
+      assert(offer.length > 0);                                               // bad_key
       const pick = key.seed === "root"
         ? offer[parseInt(sha(roots[i - 1] + "engine").slice(0, 8), 16) % offer.length]
         : move(key.knob, key.n);
@@ -172,8 +176,19 @@ for (const [i, event] of events.entries()) {
   }
   if (kind === "advance") {
     baseArm = events[cites[0]].body.conjecture;
-    const { key, diff } = events[baseArm].body;
-    if (key.procedure === "substitute-value") at[key.knob] = diff.split("\n")[4].slice(1);
+    const hunks = events[baseArm].body.diff.split("\n@@ ").slice(1).map(h => {
+      const [, a, b, c, d] = h.match(/^-(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@/);
+      const plus = h.split("\n").slice(1).filter(l => l[0] === "+").map(l => l.slice(1));
+      return { a: +a, b: b === undefined ? 1 : +b, c: +c, d: d === undefined ? 1 : +d, plus };
+    });
+    for (const k of Object.keys(knobs)) {
+      if (at[k] === null) continue;
+      const L = pos[k], hit = hunks.find(h => h.b > 0 && h.a <= L && L < h.a + h.b);
+      if (hit) {
+        const p = hit.plus.findIndex(l => l.startsWith(`${k} = `));
+        [at[k], pos[k]] = p < 0 ? [null, null] : [hit.plus[p], hit.c + p];
+      } else pos[k] += hunks.filter(h => (h.b > 0 ? h.a + h.b - 1 : h.a) < L).reduce((s, h) => s + h.d - h.b, 0);
+    }
   }
   if (kind === "return") assert.equal(body.selection, +selection.toFixed(3));
   if (kind !== "verdict") continue;

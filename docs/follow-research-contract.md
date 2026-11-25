@@ -114,7 +114,7 @@ Each trace stores one UTF-8 JSON object per line, with `seq` starting at 1 and c
 - `bits(verdict) = 1` when the registered prediction forbids some outcomes of the test and allows others. For `simplifies`, the line count is part of the test. A prediction that forbids nothing ("may change val_bpb") or everything is refused before it runs (`unfalsifiable`).
 - An `inconclusive` verdict (a crash or a timeout) carries 0 bits. It is not a refutation; it is an experiment that did not happen.
 - `edge(trace) = Σ bits(verdict)` over probe verdicts: how much the data has told the loop. Refutations count exactly as much as corroborations. The holdout does not feed back into the loop.
-- **Selection** runs the other way. `key.bits = log2(|offered|)` when the Conjecturer picks a move from the Engine's offered set, `0` when the trace root picks it (`seed: "root"`), and `null` for a `verbatim` diff, whose selection is not counted. `selection(trace) = Σ key.bits` over counted conjectures: how much the theory chose. A night reports both: the bits it spent and the bits the data returned.
+- **Selection** runs the other way. `key.bits = log2(|offered|)`, rounded to three decimals, when the Conjecturer picks a move from the Engine's offered set, `0` when the trace root picks it (`seed: "root"`), and `null` for a `verbatim` diff, whose selection is not counted. `selection(trace) = Σ key.bits` over counted conjectures: how much the theory chose. A night reports both: the bits it spent and the bits the data returned.
 - A corroborated conjecture is **not** shown true. It is the best-tested conjecture so far, and every later test may still refute it (`docs/vary-cybernetics.md` P5).
 
 ## §3 Algebra
@@ -160,7 +160,7 @@ stateDiagram-v2
 5. **The testbed is fixed.** A diff touches only `research.json` `testbed.edit`, adds no dependency, and leaves the frozen files' bytes equal to their pins (`out_of_scope`, `drift`). It never touches the seed lines, the time budget or the evaluation (`confound`).
 6. **No rescue.** A refuted diff is never run again under a weaker prediction, and the rule is never changed to save it. A revision is a new conjecture with a different diff that cites the refutation (`ad_hoc`).
 7. **Append only.** Nothing in a trace is edited or removed. A refuted conjecture stays in the trace forever, and its diff stays recoverable from the event. A wrong note gets a new note that says so.
-8. **The loop returns.** It stops when `charter.max_tested` conjectures have verdicts or when the Steward emits `stop`. If the base changed, the Critic opens one holdout comparison between first and last base at RETURN (`peek` on any other access). The Recorder emits `Return`, with probe counts and probe edge only, the separate holdout verdict or `not_run`, and the new problem.
+8. **The loop returns.** It stops when `charter.max_tested` conjectures have verdicts, when the Steward emits `stop`, or when the Conjecturer has no move: the Engine offers nothing and it declares no `verbatim` diff. Then `tested < charter.max_tested`, and P2 names the exhausted ladders. If the base changed, the Critic opens one holdout comparison between first and last base at RETURN (`peek` on any other access). The Recorder emits `Return`, with probe counts and probe edge only, the separate holdout verdict or `not_run`, and the new problem.
 
 ## §5 Refusal codes
 
@@ -174,7 +174,7 @@ Refusals use codes, not message text. Use the first failing code in table order.
 | `out_of_scope` | a diff touches a file outside `testbed.edit`, or adds a dependency |
 | `confound` | a diff touches the seed lines, `TIME_BUDGET`, `MAX_SEQ_LEN`, `EVAL_TOKENS` or the evaluation call |
 | `unfalsifiable` | a prediction has no `kind`, a `delta` below `charter.delta_min`, or forbids no outcome or all outcomes (§2) |
-| `bad_key` | a key names a procedure, knob or offset that does not exist at the base, or a move off its ladder |
+| `bad_key` | a key names a procedure, knob or offset that does not exist at the base, a move off its ladder, or a `substitute-value` pick when nothing is offered |
 | `pure_chance` | a `substitute-value` diff differs from the bytes its key gives, or a key's `offered` or `bits` is not the count §2 gives |
 | `ad_hoc` | a conjecture reuses the bytes of a refuted diff, or a rule or charter changes to save a refuted conjecture |
 | `unregistered` | a `run` cites no earlier `conjecture` (or the charter for the base; or the `stop` or last probe verdict for the holdout) |
