@@ -23,6 +23,7 @@ popper researches at the edge between two worlds. In the theory world a machine 
 - ← [read-repository.md](read-repository.md)
 - → [pin-sources.md](pin-sources.md)
 - → [vary-cybernetics.md](vary-cybernetics.md)
+- → [frame-writing-engine.md](frame-writing-engine.md)
 - → [../skills/conjecture-hypothesis.md](../skills/conjecture-hypothesis.md)
 - → [../skills/refute-experiment.md](../skills/refute-experiment.md)
 - → [../systems/loop-research.md](../systems/loop-research.md)
@@ -34,6 +35,7 @@ config = "research.json"                 # source pin, testbed, data, critic rul
 index = "ooc/popper.og"                  # optional local file map
 skills = ["skills/write-conjecture.md", "skills/conjecture-hypothesis.md", "skills/refute-experiment.md"]
 engine = "research.json engine"             # tulip's writing engine: lexicons and offsets that generate every diff
+framework = "docs/frame-writing-engine.md"  # tulip's metaheuristics indexed by generality; pinned in research.json framework
 system = "systems/loop-research.md"      # LOOP(data) { POSITIVE hypothesis; NEGATIVE experiments; } RETURN
 variant = "docs/vary-cybernetics.md"     # feedback and principles of refutation
 store = "one trace per charter"          # JSON Lines, append only, root-chained (§3)

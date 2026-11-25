@@ -50,7 +50,7 @@ Start with [`DISCLAIMER`](DISCLAIMER) and the [repository map](docs/read-reposit
 | `ooc/popper.og` | the object graph |
 | `traces/` | a replayable example, not measured results |
 
-popper is a specbase, not an executable. All rules and formats are defined here. Running new experiments requires the pinned autoresearch checkout and data, one NVIDIA GPU, and `uv`. The specbase follows the form of [tulip](https://github.com/wetware-hq/tulip) and uses tulip's writing engine to generate conjectures. The engine's rules are restated in [`skills/write-conjecture.md`](skills/write-conjecture.md), so no other specification is needed to run or replay the loop.
+popper is a specbase, not an executable. All rules and formats are defined here. Running new experiments requires the pinned autoresearch checkout and data, one NVIDIA GPU, and `uv`. The specbase follows the form of [tulip](https://github.com/wetware-hq/tulip) and uses tulip's writing engine to generate conjectures. The engine's rules are restated in [`skills/write-conjecture.md`](skills/write-conjecture.md), and its three procedures are indexed by generality in [`docs/frame-writing-engine.md`](docs/frame-writing-engine.md), so no other specification is needed to run or replay the loop.
 
 ## Licence
 

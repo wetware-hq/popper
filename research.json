@@ -14,6 +14,24 @@
       ".python-version": "sha256:7a41a41354ab8049091ef1a00253ca00567f5a1d3f9aef5502c0b4b5ce9ae707"
     }
   },
+  "framework": {
+    "repo": "wetware-hq/tulip",
+    "commit": "a2b956086f97d547f267efa47f3efabbd48995d6",
+    "licence": "MIT",
+    "role": "the writing engine that generates every diff; cited and pinned, not read at run time",
+    "files": {
+      "docs/follow-agent-contract.md": "sha256:a944dab2353f597812b86c24f64453459216d5af9148473120100b2b5377ca50",
+      "skills/substitute-lexeme.md": "sha256:d272b051fdb5dc264942d7cb942f3ad0db40d0fc0dc5d8dbccafb5aa559d9d3d",
+      "skills/combine-lines.md": "sha256:0496922eb033a12e36ebb41c07d95ef7376cf84acf0c2708635c263a5b7919ff",
+      "skills/traverse-tale.md": "sha256:af6c4eb690cbe8df8035955c1b1ee734a7565a558f5e626552db131f21b9d6fa",
+      "systems/fly-autopilot.md": "sha256:eb901b7aedac78462d8d9bad3c2cf0ba543c805970f28ec7e34fd20f5dbac17d"
+    },
+    "generality": [
+      "traverse-tale",
+      "combine-lines",
+      "substitute-value"
+    ]
+  },
   "testbed": {
     "id": "testbed:nanochat-5min",
     "edit": [

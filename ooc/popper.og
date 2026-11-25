@@ -5,7 +5,7 @@ updated: 2026-11-25
 domain: popper|auto-research|falsifiability|cybernetics
 scope: all
 governs: docs/follow-research-contract.md
-checksum: sha256:f0bfda55d54461770bafed3cce6975d3a15c20f223d0dfdad9dfeced9ce336b0
+checksum: sha256:010e0d804df166e9e8613a7f764dda90b7f554d70491c8e009dca27dd1d4304c
 ::end
 
 ::schema
@@ -20,6 +20,7 @@ banner | meta | all | 1.00 | academic, tentative, steward-only-charters
 contract | stage | all | 1.00 | worlds, edge, verdict-bit, trace, flow-laws, codes, notebook-grammar, predicates
 pins | stage | all | 1.00 | source-commit, digest, unlicensed-cite-only, probe-shard, holdout-shard, harness
 vary | stage | all | 1.00 | positive-feedback, negative-feedback, second-order, demarcation, asymmetry, ad-hoc, corroboration
+frame | stage | all | 1.00 | tulip@a2b9560, metaheuristics, generality-index, traverse-tale>combine-lines>substitute-value, fly-autopilot-unused
 engine | skill | conjecturer | 1.00 | tulip-writing-engine, hinge, choice-bits, key, substitute-value, combine-lines, traverse-tale, clinamen
 conjecture | skill | conjecturer | 1.00 | type-ii, one-change, kind, delta, forbids, bold, rescues
 refute | skill | critic | 1.00 | type-i, derived-seeds, three-replicates, first-counter-instance, dominance, 1-in-20, advance
@@ -81,6 +82,20 @@ The positive and negative loops meet at the verdict.
 ->[:precedes] engine
 ->[:precedes] conjecture
 ->[:precedes] refute
+::end
+::end
+
+::node [id=frame type=stage confidence=1.00 scope=all updated=2026-11-25]
+::dense
+generality: 1=traverse-tale|2=combine-lines|3=substitute-value|fly-autopilot=not-used
+::end
+::full
+tulip's writing-engine metaheuristics, indexed by generality.
+::end
+::edges
+->[:requires] docs/frame-writing-engine.md
+->[:requires] research.json
+->[:precedes] engine
 ::end
 ::end
 

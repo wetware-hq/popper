@@ -32,6 +32,7 @@ Read `DISCLAIMER` first. The contract governs every route.
 |---|---|
 | Run a whole research night under a Steward's charter | contract → `systems/loop-research.md` |
 | Generate the next diff from a hinge | contract → `skills/write-conjecture.md` |
+| Choose which tulip procedure to charter, by generality | `docs/frame-writing-engine.md` |
 | Propose the next hypothesis | contract → `skills/write-conjecture.md` → `skills/conjecture-hypothesis.md` |
 | Test a registered hypothesis and give its verdict | contract → `skills/refute-experiment.md` |
 | Understand the feedback loops and what changes from autoresearch | `docs/vary-cybernetics.md` |
@@ -49,6 +50,8 @@ flowchart LR
     C --> P[pin-sources]
     C --> V[vary-cybernetics]
     V --> W[write-conjecture]
+    C --> F[frame-writing-engine]
+    F --> W
     W --> H[conjecture-hypothesis]
     V --> E[refute-experiment]
     P --> E
