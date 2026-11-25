@@ -112,7 +112,7 @@
     },
     "alpha": 0.05,
     "ties": "refute",
-    "crash": "inconclusive"
+    "crash": "inconclusive; a missing or non-finite val_bpb is a crash"
   },
   "charter": {
     "delta_min": 0.001,
