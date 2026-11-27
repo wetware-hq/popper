@@ -177,7 +177,7 @@ Refusals use codes, not message text. Use the first failing code in table order.
 |---|---|
 | `unpinned` | the source, a data shard or the holdout harness has no pin in `research.json` |
 | `drift` | pinned bytes do not hash to `digest`, or a replay gives different verdicts |
-| `unproved` | the `skills/prove-rule.md` cell fails under the pinned Lean, uses a forbidden token, or depends on an axiom outside `research.json` `prover.axioms` |
+| `unproved` | the `skills/prove-rule.md` cell is empty or misses a theorem, fails under the pinned Lean, uses a forbidden token, or depends on an axiom outside `research.json` `prover.axioms` |
 | `self_charter` | a `charter`, `amend` or `stop` event came from anyone but the Steward |
 | `out_of_scope` | a diff touches a file outside `testbed.edit`, or adds a dependency |
 | `confound` | a diff touches the seed lines, `TIME_BUDGET`, `MAX_SEQ_LEN`, `EVAL_TOKENS` or the evaluation call |
