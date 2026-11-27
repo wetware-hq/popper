@@ -320,12 +320,12 @@
     "profiles": {
       "e3": {
         "lanes": 24,
-        "stems": 2,
+        "stems": 3,
         "night_h": 8
       },
       "e4": {
         "lanes": 192,
-        "stems": 9,
+        "stems": 18,
         "night_h": 8
       }
     },

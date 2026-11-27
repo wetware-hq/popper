@@ -85,7 +85,7 @@ stem s = the pin with each constant K moved by (seed(r1, "stem/" + s + "/" + K) 
 r1     = the ledger root just after the charter
 ```
 
-A stem is a chartered base, not an advance. Its lane replicates it three times before any conjecture. Lanes on the same stem get disjoint slices. Choose `stems ≥ ⌈lanes / 22⌉`. Every corroborated advance opens up to 22 new diffs on its own branch, so the frontier widens as the night goes on.
+A stem is a chartered base, not an advance. Its lane replicates it three times before any conjecture. Lanes on the same stem get disjoint slices of whole constants, so at most 11 lanes share a stem. Choose `stems ≥ ⌈lanes / 11⌉`. Every corroborated advance opens up to 22 new diffs on its own branch, so the frontier widens as the night goes on.
 
 ## Commits
 
@@ -93,8 +93,8 @@ One handoff is one commit on the lane branch. That commit appends the lane's new
 
 ```text { type: notebook.cell }
 commits ≈ lanes × (1 + (60·H / run_min − 3) / r̄) + merges       # r̄ = mean runs per verdict
-e3:  24 lanes, 2 stems, H = 8, run_min = 5.5, r̄ = 1.6  →  ≈ 1,290     meets min 10^3 while r̄ ≤ 2.0
-e4: 192 lanes, 9 stems, H = 8                          →  ≈ 10,300    the Planner stops assigning at max 10^4
+e3:  24 lanes, 3 stems, H = 8, run_min = 5.5, r̄ = 1.6  →  ≈ 1,290     meets min 10^3 while r̄ ≤ 2.0
+e4: 192 lanes, 18 stems, H = 8                         →  ≈ 10,300    the Planner stops assigning at max 10^4
 ```
 
 Refutations take one run each and corroborations take three, so r̄ is low on refutation-heavy nights. A night with many corroborations makes fewer commits. It reports `short: true` and does not pad (`farming`). The count is an output of the night, not its goal.
@@ -124,6 +124,7 @@ LANES(data) in parallel {                            # each one is LOOP(data) fr
 }
 PLANNER, on each handoff {
   corroborated → transfer the block to lanes whose head lacks that constant value
+                 (a lane's hinge offers it only once it is not a duplicate on that lane's base)
   head beats research by the rule → Auditor replays the lane trace → audit → merge
   idle lane → reassign it to a fresh stem, or let it end
   every checkpoint_min → checkpoint { commits, r̄, U, AUC, projected }
@@ -133,7 +134,9 @@ RETURN at end_min or Steward stop or commits = max:
          Recorder emits return { commits, short, tally, U, AUC, research, holdout, P2 }
 ```
 
-**Promotion rule.** A merge needs the `improves` rule from `skills/refute-experiment.md`, with `delta = delta_min`. It is applied to the lane head's recorded results `h` against the research head's `b`, or the promoted lane's base `b` while research is still at the pin. No new runs are made, so the rule is a pure function of the ledger and is replayable.
+**Promotion rule.** A merge needs the `improves` rule from `skills/refute-experiment.md`, with `delta = delta_min`. It is applied to the lane head's recorded results `h` against the research head's `b`, or, while research is still at the pin, against the first stem-0 base handoff in the ledger. A head that beats only its own weaker stem therefore cannot replace the pin. No new runs are made, so the rule is a pure function of the ledger and is replayable.
+
+**Audit.** The Auditor runs the checks of the `loop-research` replay cell on the candidate lane's own trace, not on `nov25`. It replaces the `research.json traces` pin with the lane trace and the handoff's `lane_root`. It adds this system's three lane changes: the charter cites the `assign`, transferred rows cite their `transfer`, and there is no holdout. The audit passes only if the lane trace replays to `lane_root` and its last verdict equals the handoff's.
 
 **Holdout.** The holdout harness runs exactly as in `refute-experiment` §RETURN, between the pin and the research head, with `delta = holdout_delta`. The holdout never causes a merge or an advance.
 
@@ -195,7 +198,7 @@ P2: *Does EMBEDDING_LR 0.8 corroborate on stem 1, where the base learning rates 
 
 ## Replay
 
-Run this cell with Node.js from the repository root. It checks the ledger digest and root, stems, keys, slices, the duplicate gate, every verdict, transfers, audits, merges, lane clocks, commit totals, utility, AUC, and the holdout verdict (S1–S10). Lane traces are not replayed here; an Auditor replays each one with the `loop-research` cell before it signs an audit.
+Run this cell with Node.js from the repository root. It checks the ledger digest and root, stems, keys, slices, the duplicate gate, every verdict, transfers, audits, merges, lane clocks, commit totals, utility, AUC, and the holdout verdict (S1–S10). Lane traces are not replayed here; an Auditor replays each one as described under **Audit** before it signs an audit.
 
 ```js { type: notebook.cell }
 const { createHash } = require("node:crypto");
@@ -233,8 +236,8 @@ const stem = s => Object.fromEntries(Object.keys(L).map(K => {
   return [K, L[K][Math.min(L[K].length - 1, Math.max(0, j + d))]];
 }));
 
-const lane = {}, seen = new Set(), depth = {}, reach = {}, base0 = {}, head = { b: null, set: new Set(), commit: null };
-let U = 0, auc = 0, last = 0, commits = 0, merges = 0, runs = 0, tested = 0, bits = 0;
+const lane = {}, seen = new Set(), depth = {}, reach = {}, head = { b: null, set: new Set(), commit: null };
+let pinB = null, U = 0, auc = 0, last = 0, commits = 0, merges = 0, runs = 0, tested = 0, bits = 0;
 const tally = { refuted: 0, corroborated: 0, inconclusive: 0 };
 const at = seq => events[seq - 1];
 for (const e of events.slice(1)) {
@@ -256,7 +259,8 @@ for (const e of events.slice(1)) {
     l.t = B.t;
     if (B.base) {
       assert.ok(l.b === null && B.runs === 3 && B.b.length === 3);
-      l.b = B.b; base0[B.lane] = B.b; l.head = B.commit;
+      l.b = B.b; l.head = B.commit;
+      if (l.stem === 0 && !pinB) pinB = B.b;
     } else {
       assert.ok(l.b !== null, "no base");
       assert.deepEqual(B.b, l.b);
@@ -299,7 +303,8 @@ for (const e of events.slice(1)) {
     const A = at(e.cites[0]), h = at(B.handoff).body;
     assert.ok(A.kind === "audit" && A.body.handoff === B.handoff, "unaudited at " + e.seq);
     assert.equal(h.commit, lane[h.lane].head, "merge of a stale head");
-    assert.equal(improves(head.b ?? base0[h.lane], h.h, ch.delta_min), "corroborated", "self_verdict at " + e.seq);
+    assert.ok(pinB, "no pin base");
+    assert.equal(improves(head.b ?? pinB, h.h, ch.delta_min), "corroborated", "self_verdict at " + e.seq);
     assert.equal(B.branch, S.branches.research.replace("<tag>", ch.tag));
     commits++; merges++;
     head.b = h.h; head.commit = h.commit; head.set = new Set(lane[h.lane].set);
