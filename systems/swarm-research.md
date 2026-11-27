@@ -117,7 +117,7 @@ U is a step function that changes only at ledger events, so AUC is exact. Nights
 ```text { type: notebook.cell }
 charter := Steward                                   # lanes, stems, end_min, commits {min, max}
 setup:   pin the checkout (docs/pin-sources.md); create popper/<tag>/research at source.commit
-plan:    Planner assigns each lane a stem and a slice; disjoint slices on a shared stem
+plan:    Planner assigns each lane a stem and a slice; disjoint slices on a shared stem; lane 1 is on stem 0
 LANES(data) in parallel {                            # each one is LOOP(data) from loop-research
   base:     Critic runs the lane's base three times → handoff (base)
   LOOP:     hinge ∩ slice ∪ transfers → pick → diff → conjecture → refute → handoff
@@ -134,7 +134,7 @@ RETURN at end_min or Steward stop or commits = max:
          Recorder emits return { commits, short, tally, U, AUC, research, holdout, P2 }
 ```
 
-**Promotion rule.** A merge needs the `improves` rule from `skills/refute-experiment.md`, with `delta = delta_min`. It is applied to the lane head's recorded results `h` against the research head's `b`, or, while research is still at the pin, against the first stem-0 base handoff in the ledger. A head that beats only its own weaker stem therefore cannot replace the pin. No new runs are made, so the rule is a pure function of the ledger and is replayable.
+**Promotion rule.** A merge needs the `improves` rule from `skills/refute-experiment.md`, with `delta = delta_min`. It is applied to the lane head's recorded results `h` against the research head's `b`, or, while research is still at the pin, against the first stem-0 base handoff in the ledger. Lane 1 always starts on stem 0, so that base exists, and no merge happens before it. A head that beats only its own weaker stem therefore cannot replace the pin. No new runs are made, so the rule is a pure function of the ledger and is replayable.
 
 **Audit.** The Auditor runs the checks of the `loop-research` replay cell on the candidate lane's own trace, not on `nov25`. It replaces the `research.json traces` pin with the lane trace and the handoff's `lane_root`. It adds this system's three lane changes: the charter cites the `assign`, transferred rows cite their `transfer`, and there is no holdout. The audit passes only if the lane trace replays to `lane_root` and its last verdict equals the handoff's.
 
@@ -247,6 +247,7 @@ for (const e of events.slice(1)) {
   auc += U * (B.t - last) / 60; last = B.t;
   if (e.kind === "assign") {
     assert.ok(B.lane >= 1 && B.lane <= ch.lanes && !lane[B.lane] && B.stem < ch.stems);
+    if (B.lane === 1) assert.equal(B.stem, 0, "no pin base");
     assert.equal(B.branch, S.branches.lane.replace("<tag>", ch.tag).replace("<k>", B.lane));
     assert.ok(B.slice.every(K => K in L), "out_of_scope");
     for (const o of Object.values(lane)) if (o.stem === B.stem) assert.ok(B.slice.every(K => !o.slice.includes(K)), "duplicate slice");
