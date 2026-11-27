@@ -5,7 +5,7 @@ updated: 2026-11-25
 domain: popper|auto-research|falsifiability|cybernetics
 scope: all
 governs: docs/follow-research-contract.md
-checksum: sha256:010e0d804df166e9e8613a7f764dda90b7f554d70491c8e009dca27dd1d4304c
+checksum: sha256:281ea7fd81862d02c7f15e46bb651763eb25ba45a6b7229101fbee81a9a88bf9
 ::end
 
 ::schema
@@ -25,6 +25,7 @@ engine | skill | conjecturer | 1.00 | tulip-writing-engine, hinge, choice-bits, 
 conjecture | skill | conjecturer | 1.00 | type-ii, one-change, kind, delta, forbids, bold, rescues
 refute | skill | critic | 1.00 | type-i, derived-seeds, three-replicates, first-counter-instance, dominance, 1-in-20, advance
 loop | system | recorder | 1.00 | charter, base, LOOP-data, notes, max-tested, holdout-once, P2, replay
+swarm | system | recorder | 1.00 | lanes, stems, slices, transfer, audit, merge, commits-1e3-1e4, utility-auc, ledger, replay
 stop | assertion | all | 1.00 | return, holdout-read, P2
 ::end
 
@@ -162,6 +163,22 @@ A charter runs to RETURN; the trace is an example.
 ->[:requires] systems/loop-research.md
 ->[:precedes] stop
 ->[:refuses] verification
+->[:refuses] peek
+::end
+::end
+
+::node [id=swarm type=system confidence=1.00 scope=recorder updated=2026-11-27]
+::dense
+lanes|stems|disjoint-slices|transfer|audit|merge|commits-min-max|depth*reach|AUC|traces/nov27-swarm.jsonl
+::end
+::full
+Many loop nights in parallel; one handoff is one commit; the ledger is an example.
+::end
+::edges
+->[:composes] loop
+->[:precedes] stop
+->[:refuses] duplicate
+->[:refuses] farming
 ->[:refuses] peek
 ::end
 ::end

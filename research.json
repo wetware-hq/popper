@@ -153,6 +153,12 @@
       "events": 50,
       "root": "55f40d6c13415585e9e169a673f23a91123d7d4f6c1ac41abb85ae5cc7636d56",
       "illustrative": true
+    },
+    "traces/nov27-swarm.jsonl": {
+      "digest": "sha256:1f5eb0c76dd6c6eefa1a91031d63ad5f918887f3ee8c134d3841ebad45e56af5",
+      "events": 39,
+      "root": "454ea61ae95698e9b5c9e8e312f867b1d280fccad34f7374bd2439151c245b52",
+      "illustrative": true
     }
   },
   "engine": {
@@ -194,5 +200,141 @@
     "block": "train.py hyperparameter assignments, lines 433-451 at the pin",
     "seed": "conjecturer",
     "picks": "the Conjecturer picks one offered option; with seed = machine, option seed(r, \"key\") mod size, r = root just after the hinge"
+  },
+  "swarm": {
+    "system": "systems/swarm-research.md",
+    "root_empty": "c8464c1f532e102638e6037bdb0a8363d5f74759d7e8911eb879e2d1b4c45844",
+    "branches": {
+      "lane": "popper/<tag>/lane-<k>",
+      "research": "popper/<tag>/research"
+    },
+    "roles": {
+      "steward": "charters the night and may stop it",
+      "planner": "assigns lanes, slices and transfers; never writes a diff or a verdict",
+      "lane": "one popper loop on one GPU: Engine, Conjecturer, Critic, Recorder",
+      "auditor": "replays a lane trace before a merge",
+      "recorder": "writes the swarm ledger"
+    },
+    "lexicons": {
+      "ASPECT_RATIO": [
+        32,
+        48,
+        64,
+        80,
+        96
+      ],
+      "EMBEDDING_LR": [
+        0.2,
+        0.3,
+        0.4,
+        0.6,
+        0.8,
+        1
+      ],
+      "UNEMBEDDING_LR": [
+        0.002,
+        0.003,
+        0.004,
+        0.006,
+        0.008
+      ],
+      "MATRIX_LR": [
+        0.01,
+        0.02,
+        0.03,
+        0.04,
+        0.05,
+        0.06,
+        0.08
+      ],
+      "SCALAR_LR": [
+        0.2,
+        0.3,
+        0.5,
+        0.7,
+        1
+      ],
+      "WEIGHT_DECAY": [
+        0,
+        0.1,
+        0.2,
+        0.3,
+        0.4
+      ],
+      "WARMUP_RATIO": [
+        0,
+        0.02,
+        0.05,
+        0.1
+      ],
+      "WARMDOWN_RATIO": [
+        0.3,
+        0.4,
+        0.5,
+        0.6,
+        0.7
+      ],
+      "FINAL_LR_FRAC": [
+        0,
+        0.05,
+        0.1,
+        0.2
+      ],
+      "DEPTH": [
+        4,
+        6,
+        8,
+        10,
+        12
+      ],
+      "DEVICE_BATCH_SIZE": [
+        32,
+        64,
+        128,
+        256
+      ]
+    },
+    "pin": {
+      "ASPECT_RATIO": 64,
+      "EMBEDDING_LR": 0.6,
+      "UNEMBEDDING_LR": 0.004,
+      "MATRIX_LR": 0.04,
+      "SCALAR_LR": 0.5,
+      "WEIGHT_DECAY": 0.2,
+      "WARMUP_RATIO": 0,
+      "WARMDOWN_RATIO": 0.5,
+      "FINAL_LR_FRAC": 0,
+      "DEPTH": 8,
+      "DEVICE_BATCH_SIZE": 128
+    },
+    "stems": "stem 0 is the pin; stem s moves each constant K by (seed(r1, \"stem/\" + s + \"/\" + K) mod 3) - 1 rungs, clamped; r1 = ledger root after the charter",
+    "run_min": 5.5,
+    "commits": {
+      "min": 1000,
+      "max": 10000,
+      "count": [
+        "handoff",
+        "merge"
+      ]
+    },
+    "profiles": {
+      "e3": {
+        "lanes": 24,
+        "stems": 3,
+        "night_h": 8
+      },
+      "e4": {
+        "lanes": 192,
+        "stems": 18,
+        "night_h": 8
+      }
+    },
+    "checkpoint_min": 60,
+    "utility": {
+      "depth": "round((mean(b) - mean(h)) / delta_min, 3) at the origin verdict",
+      "reach": "origin verdict + corroborated transfers + promotions that carry it",
+      "U": "sum over corroborated diffs of depth * reach",
+      "auc": "integral of U over ledger time, delta_min-branch-hours, to end_min"
+    }
   }
 }

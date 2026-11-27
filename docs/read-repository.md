@@ -23,6 +23,7 @@ popper is a cybernetic auto-research specbase. A Conjecturer proposes, a Critic 
 - → [follow-research-contract.md](follow-research-contract.md)
 - → [vary-cybernetics.md](vary-cybernetics.md)
 - → [../systems/loop-research.md](../systems/loop-research.md)
+- → [../systems/swarm-research.md](../systems/swarm-research.md)
 
 ## Route
 
@@ -31,6 +32,7 @@ Read `DISCLAIMER` first. The contract governs every route.
 | Task | Path |
 |---|---|
 | Run a whole research night under a Steward's charter | contract → `systems/loop-research.md` |
+| Run many lanes overnight, with transfers, merges and a commit budget | contract → `systems/loop-research.md` → `systems/swarm-research.md` |
 | Generate the next diff from a hinge | contract → `skills/write-conjecture.md` |
 | Choose which tulip procedure to charter, by generality | `docs/frame-writing-engine.md` |
 | Propose the next hypothesis | contract → `skills/write-conjecture.md` → `skills/conjecture-hypothesis.md` |
@@ -57,6 +59,7 @@ flowchart LR
     P --> E
     H --> L[loop-research]
     E --> L
+    L --> S[swarm-research]
 ```
 
 ## Licence

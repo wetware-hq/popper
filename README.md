@@ -18,6 +18,10 @@ LOOP(data) {
 4. **The data decides.** An improvement becomes the new base only if all three runs beat all three base runs and the mean gain meets the prediction. A simplification must remove more lines than it adds and stay within the allowed mean loss. Every verdict stays in the trace.
 5. **The holdout is read at RETURN.** If the base changed, the Critic compares the first and last base on a data shard the loop never saw. The Recorder returns the result and the next problem, P2.
 
+## How a swarm night runs
+
+A [swarm night](systems/swarm-research.md) runs many of these loops at once, one per GPU, each on its own branch `popper/<tag>/lane-<k>`. A Planner gives each lane a starting base and a slice of hyperparameters, so no diff is tested twice on the same base. Corroborated diffs are passed to other lanes. A lane head merges into `popper/<tag>/research` only after an Auditor replays its trace and the head beats research by the same rule. Each verdict is one commit, so a night produces 10^3–10^4 commits. The night is scored by the area under its utility curve, which is depth × reach summed over corroborated diffs.
+
 ## Words
 
 | Word | Means |
@@ -46,6 +50,7 @@ Start with [`DISCLAIMER`](DISCLAIMER) and the [repository map](docs/read-reposit
 | `docs/` | reading order, research contract, source and data pins, principles |
 | `skills/` | the Engine, the Conjecturer and the Critic |
 | `systems/loop-research.md` | the whole night, with a worked trace |
+| `systems/swarm-research.md` | many lanes in parallel, one ledger, with a worked ledger |
 | `research.json` | pins, testbed, data split, decision rule, charter defaults |
 | `ooc/popper.og` | the object graph |
 | `traces/` | a replayable example, not measured results |

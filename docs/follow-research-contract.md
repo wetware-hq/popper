@@ -37,6 +37,7 @@ skills = ["skills/write-conjecture.md", "skills/conjecture-hypothesis.md", "skil
 engine = "research.json engine"             # tulip's writing engine: lexicons and offsets that generate every diff
 framework = "docs/frame-writing-engine.md"  # tulip's metaheuristics indexed by generality; pinned in research.json framework
 system = "systems/loop-research.md"      # LOOP(data) { POSITIVE hypothesis; NEGATIVE experiments; } RETURN
+swarm = "systems/swarm-research.md"      # many lanes of the system in parallel, one ledger, AUC objective
 variant = "docs/vary-cybernetics.md"     # feedback and principles of refutation
 store = "one trace per charter"          # JSON Lines, append only, root-chained (§3)
 ```
