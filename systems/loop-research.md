@@ -11,10 +11,10 @@ This is one research night, from the Steward's charter to the holdout. It compos
   "id": "systems/loop-research.md",
   "type": "system",
   "role": "run a charter to RETURN: base, then conjecture and refutation until the budget, then the holdout once",
-  "reads": ["research.json", "charter", "skills/write-conjecture.md", "skills/conjecture-hypothesis.md", "skills/refute-experiment.md", "skills/prove-rule.md"],
+  "reads": ["research.json", "charter", "skills/write-conjecture.md", "skills/conjecture-hypothesis.md", "skills/refute-experiment.md", "skills/prove-rule.md", "skills/check-netlist.md"],
   "writes": ["trace", "results.tsv", "notebook"],
   "must": ["start from a Steward charter", "replicate the base first", "one conjecture under test at a time", "a note after every probe verdict", "stop at max_tested or Steward stop", "compare on the holdout only at RETURN if the base changed", "return P2"],
-  "check": ["R1-R17"]
+  "check": ["R1-R20"]
 }
 ```
 
@@ -25,6 +25,7 @@ This is one research night, from the Steward's charter to the holdout. It compos
 - ← [../skills/conjecture-hypothesis.md](../skills/conjecture-hypothesis.md)
 - ← [../skills/refute-experiment.md](../skills/refute-experiment.md)
 - ← [../skills/prove-rule.md](../skills/prove-rule.md)
+- ← [../skills/check-netlist.md](../skills/check-netlist.md)
 
 ## Procedure
 
@@ -32,6 +33,7 @@ This is one research night, from the Steward's charter to the holdout. It compos
 charter := Steward                                   # P1
 setup:   prepare the pinned checkout and cache (docs/pin-sources.md)
          Prover checks the rule with the pinned Lean 4 (skills/prove-rule.md); unproved → no base run
+         Checker closes every option research.json library forbids (skills/check-netlist.md); unrealizable → no base run
          create popper/<tag> at source.commit; append the charter as seq 1
 base:    Critic runs the base three times → b      # seeds from the root after the charter
 LOOP(data) {
@@ -39,15 +41,17 @@ LOOP(data) {
   POSITIVE: Conjecturer emits one conjecture on the base      # TT
   NEGATIVE: Critic runs it until refuted, inconclusive, or corroborated   # EE
             corroborated → advance; b := h
-  Recorder emits one note citing the conjecture, results, verdict, advance
+  Recorder emits one note citing the conjecture, results, verdict, advance, with the verdict's margin
 } until verdicts ≥ charter.max_tested, or Steward emits stop, or a hinge offers nothing (size 0: the search space is closed)
 RETURN:  if the base changed, Critic compares first base vs last base on the holdout
+         Checker reports score = min margin over the advances, and the netlist if the charter asks
          Recorder emits return { tested, refuted, corroborated, inconclusive, edge, holdout, base, P2 }
 ```
 
 - **Unattended between charter and RETURN.** Like the source, the loop does not stop to ask whether to continue. Unlike the source, it does stop, at the charter's budget, and the Steward may `stop` or `amend` at any time. An `amend` applies only from the next conjecture on, never to one already registered (`ad_hoc`).
 - **One arm at a time.** Arms are tested in trace order, so every verdict reads the base that was current when the conjecture was registered.
 - **The holdout runs cite what ended the probe loop.** Their `arm` is the sequence number of the Steward's `stop`, the empty hinge, or the last probe verdict, whichever ended the loop. Their seeds are derived from the root just after that event.
+- **The Checker runs at the ends, not in the middle.** It closes unrealizable options before seq 1, because closing one later would change every hinge size and the night would no longer replay, and it reports the margins at RETURN. It writes no trace event and judges nothing (`skills/check-netlist.md`).
 - **P2.** The return names one new problem the night opened, as a question. It does not say what is true.
 
 ## Worked trace
@@ -79,6 +83,8 @@ RETURN:  if the base changed, Critic compares first base vs last base on the hol
 | 37–48 | data | run, result | holdout: base `228791f` → `[1.0012, 1.0017, 1.0009]`; base B → `[0.9991, 0.9994, 0.9988]` |
 | 49 | data | verdict | holdout **corroborated**: all three below 1.0009, mean gain 0.0022 ≥ 0.001 |
 | 50 | frame | return | tested 3, refuted 1, corroborated 1, inconclusive 1, edge 2 bits, P2 below |
+
+The night's one advance has a margin of `0.9976 − 0.9962 = 0.0014`, so `score = 1.4 × delta_min`: the chain held, and narrowly. The holdout margin, `0.0015`, is reported apart from it. The crash at e34 is what the illustrative `library.example` on `DEPTH × DEVICE_BATCH_SIZE` cites, and P2 is the question that crash left open.
 
 The Conjecturer chose 2.585 + 2.322 + 2.322 ≈ 7.2 bits of diff, and the data returned 2 bits of verdict. The Recorder reports the two numbers separately.
 

@@ -11,10 +11,10 @@ A swarm night runs many popper loops at once, one per GPU, and outputs between 1
   "id": "systems/swarm-research.md",
   "type": "system",
   "role": "run one charter across many lanes to RETURN and maximise the area under the utility curve",
-  "reads": ["research.json swarm", "charter", "systems/loop-research.md", "skills/write-conjecture.md", "skills/refute-experiment.md"],
+  "reads": ["research.json swarm", "charter", "systems/loop-research.md", "skills/write-conjecture.md", "skills/refute-experiment.md", "skills/check-netlist.md"],
   "writes": ["swarm ledger", "lane traces", "lane and research branches"],
   "must": ["every lane is a loop-research night", "one handoff is one commit", "no diff is tested twice on the same base bytes", "transfer only corroborated diffs", "merge only audited heads that pass the rule", "open the holdout once, for the research head", "never pad the commit count"],
-  "check": ["R1-R17 per lane", "S1-S10"]
+  "check": ["R1-R20 per lane", "S1-S10"]
 }
 ```
 
@@ -136,7 +136,7 @@ RETURN at end_min or Steward stop or commits = max:
 
 **Promotion rule.** A merge needs the `improves` rule from `skills/refute-experiment.md`, with `delta = delta_min`. It is applied to the lane head's recorded results `h` against the research head's `b`, or, while research is still at the pin, against the first stem-0 base handoff in the ledger. Lane 1 always starts on stem 0, so that base exists, and no merge happens before it. A head that beats only its own weaker stem therefore cannot replace the pin. No new runs are made, so the rule is a pure function of the ledger and is replayable.
 
-**Audit.** The Auditor runs the checks of the `loop-research` replay cell on the candidate lane's own trace, not on `nov25`. It replaces the `research.json traces` pin with the lane trace and the handoff's `lane_root`. It adds this system's three lane changes: the charter cites the `assign`, transferred rows cite their `transfer`, and there is no holdout. The audit passes only if the lane trace replays to `lane_root` and its last verdict equals the handoff's. Before the first audit of a night, the Auditor reruns the Prover check (`skills/prove-rule.md`); if it fails, nothing merges (`unproved`).
+**Audit.** The Auditor runs the checks of the `loop-research` replay cell on the candidate lane's own trace, not on `nov25`. It replaces the `research.json traces` pin with the lane trace and the handoff's `lane_root`. It adds this system's three lane changes: the charter cites the `assign`, transferred rows cite their `transfer`, and there is no holdout. The audit passes only if the lane trace replays to `lane_root` and its last verdict equals the handoff's. Before the first audit of a night, the Auditor reruns the Prover check (`skills/prove-rule.md`); if it fails, nothing merges (`unproved`). It also runs the Checker over the lane's slice: a slice that can reach a configuration `research.json` `library` forbids on the device is `unrealizable` and the Planner reslices before the lane starts, and a handoff whose base levels are not the arm results of the lane's last corroborated handoff is `mismatch` (R18); after a refuted or inconclusive handoff the base does not move, so neither do its levels.
 
 **Holdout.** The holdout harness runs exactly as in `refute-experiment` §RETURN, between the pin and the research head, with `delta = holdout_delta`. The holdout never causes a merge or an advance.
 
