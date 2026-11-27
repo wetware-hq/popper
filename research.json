@@ -133,7 +133,7 @@
     "docs": "https://lean-lang.org/doc",
     "cell": "skills/prove-rule.md",
     "extract": "awk '/^```lean( |$)/{f=1;next}/^```/{f=0}f' skills/prove-rule.md > Popper.lean",
-    "run": "lean Popper.lean",
+    "run": "lean +leanprover/lean4:v4.36.0 Popper.lean",
     "imports": [],
     "forbidden": [
       "sorry",

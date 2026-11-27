@@ -44,10 +44,10 @@ The four `example`s at the end replay the verdicts of [`traces/nov25.jsonl`](../
 
 ## Procedure
 
-1. Install the toolchain pinned in `research.json` `prover` (`elan toolchain install` with that version) and check that `lean --version` prints the pinned commit (`unpinned`, `drift`).
+1. Install the toolchain pinned in `research.json` `prover` (`elan toolchain install` with that version) and check that `lean +leanprover/lean4:v4.36.0 --version` prints the pinned commit (`unpinned`, `drift`). Every `lean` call names the pin with `+`, so another active or default toolchain is never used.
 2. Extract the cell from the repository root: `awk '/^```lean( |$)/{f=1;next}/^```/{f=0}f' skills/prove-rule.md > Popper.lean`.
 3. Check that the extracted file contains none of `sorry`, `admit`, `axiom `, `native_decide`, `implemented_by`, `extern`.
-4. Run `lean Popper.lean`. It must exit 0 with no `error` or `warning` line. Each `#print axioms` line must list only `propext`, `Quot.sound` or `Classical.choice`, or no axioms.
+4. Run `lean +leanprover/lean4:v4.36.0 Popper.lean`. It must exit 0 with no `error` or `warning` line. Each `#print axioms` line must list only `propext`, `Quot.sound` or `Classical.choice`, or no axioms.
 5. If any step fails, the night does not start: no charter base run is made, and the Steward reads the code `unproved` with the failing step. The Prover writes no trace event, so a check never changes a root or a seed.
 
 The Prover runs once per charter, before the Critic's first base run, and again whenever `research.json` `critic` or `engine` changes. In a swarm, the Auditor reruns it before the first audit. A passing check is reported as **checked by Lean**, never as "the loop is verified": it says the rule has these properties, not that any run followed the rule (that is R7, by replay).
