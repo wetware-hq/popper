@@ -59,7 +59,7 @@ Cello's score is a ratio of fluorescence levels in relative promoter units, maxi
 
 ## Why the host limits are not hyperparameters
 
-A lexicon value is a conjecture the night may test; a library rule is a statement about the pinned device, that `DEPTH 10` at `DEVICE_BATCH_SIZE 128` exhausts its memory, as three recorded crashes show. The first is refutable by this testbed. The second is not: a crash is `inconclusive` and carries 0 bits, so the device never refutes anything, it only declines to run. Keeping them apart is what stops the library becoming a place to put a preference: each rule names the result that evidences it, or it is `invention`.
+A lexicon value is a conjecture the night may test; a library rule is a statement about the pinned device, that `DEPTH 10` at `DEVICE_BATCH_SIZE 128` exhausts its memory, as the worked traces' three crashes illustrate (they are synthetic, so `research.json` keeps that rule as `library.example`, binding nothing). The first is refutable by this testbed. The second is not: a crash is `inconclusive` and carries 0 bits, so the device never refutes anything, it only declines to run. Keeping them apart is what stops the library becoming a place to put a preference: each rule names the result that evidences it, or it is `invention`.
 
 ## Design pin
 

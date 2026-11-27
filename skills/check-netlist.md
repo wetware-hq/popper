@@ -52,7 +52,7 @@ The library is popper's UCF: what the pinned device can be asked to run, as oppo
 
 Every rule carries `evidence`: the trace, sequence number and `status` of a result that records the failure it generalises. A rule with no such citation is `invention`; the library is not a place to put a hunch. A rule is therefore always downstream of the data: the first night on a pin has an empty rule list, pays for each crash once, and the Steward writes the rule the night's P2 asks for.
 
-At the pin the one rule is `NOTMORETHAN DEPTH * DEVICE_BATCH_SIZE 1024`. It cites three crashes: `DEPTH 8 → 10` at [`traces/nov25.jsonl`](../traces/nov25.jsonl) e34, whose P2 asks whether the warmdown gain survives at ten layers once the batch is halved; the same move on lane 2 at [`traces/nov27-swarm.jsonl`](../traces/nov27-swarm.jsonl) e16; and lane 3's `DEVICE_BATCH_SIZE 128 → 256` at `DEPTH 8`, e38. So `DEPTH 10` stays available at `DEVICE_BATCH_SIZE 64` and is closed at 128. It forbids no option the `nov25` charter offered, because `DEVICE_BATCH_SIZE` is not in `engine.lexicons`: a swarm slice reaches it (`swarm.lexicons`), and an `engine.lexicons` night reaches it only by an `amend`. Both worked nights are the rule's evidence, so it binds charters after them (`library.from`) and never re-judges a trace already written.
+At the pin the rule list is empty. The worked traces are illustrative and their results synthetic, so their crashes evidence no limit of a real device; `library.example` keeps one rule only to show the form, and binds nothing. It is `NOTMORETHAN DEPTH * DEVICE_BATCH_SIZE 1024`, citing three crashes: `DEPTH 8 → 10` at [`traces/nov25.jsonl`](../traces/nov25.jsonl) e34, whose P2 asks whether the warmdown gain survives at ten layers once the batch is halved; the same move on lane 2 at [`traces/nov27-swarm.jsonl`](../traces/nov27-swarm.jsonl) e16; and lane 3's `DEVICE_BATCH_SIZE 128 → 256` at `DEPTH 8`, e38. Were those crashes measured, it would keep `DEPTH 10` available at `DEVICE_BATCH_SIZE 64` and close it at 128.
 
 ## Procedure
 
@@ -132,8 +132,8 @@ assert.equal(score, 1400);                       // 0.9976 - 0.9962, the only pr
 assert.equal(holdout.margin, 1500);              // 1.0009 - 0.9994, reported apart from the score
 assert.equal(score / level(config.charter.delta_min), 1.4);
 
-// R19: no rule in the library may close an option the worked night offered.
-for (const rule of config.library.rules) {
+// R19: every rule, and the worked example, cites the result that evidences it.
+for (const rule of [...config.library.rules, config.library.example]) {
   assert(rule.evidence.length > 0, "invention");
   for (const { trace, seq, status } of rule.evidence) {
     const cited = read(trace, "utf8").trimEnd().split("\n").map(JSON.parse)[seq - 1];

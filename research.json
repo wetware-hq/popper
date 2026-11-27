@@ -209,44 +209,44 @@
   "library": {
     "device": "the testbed's GPU (research.json testbed.hardware) at the testbed pin",
     "role": "popper's user constraint file: what the pinned device can be asked to run, as opposed to what the Engine can write",
-    "from": "charters after nov25 and nov27: those nights are the evidence, so the rule binds the next charter on, never a trace already written",
+    "from": "the first night on a pin starts with no rules; a rule enters only when a measured crash or timeout on the pinned device evidences it, and binds charters after that night, never a trace already written",
     "evidence": "every rule cites the result that records the failure it generalises; a rule with no such citation is invention",
-    "rules": [
-      {
-        "rule": "NOTMORETHAN DEPTH * DEVICE_BATCH_SIZE 1024",
-        "constants": [
-          "DEPTH",
-          "DEVICE_BATCH_SIZE"
-        ],
-        "reads": "the product of the two values stays at or below the bound; at DEPTH 8 the pinned DEVICE_BATCH_SIZE 128 is the limit, and DEPTH 10 is available at DEVICE_BATCH_SIZE 64",
-        "evidence": [
-          {
-            "trace": "traces/nov25.jsonl",
-            "seq": 34,
-            "status": "crash",
-            "of": "DEPTH 8 -> 10 at DEVICE_BATCH_SIZE 128"
-          },
-          {
-            "trace": "traces/nov27-swarm.jsonl",
-            "seq": 16,
-            "status": "crash",
-            "of": "lane 2 DEPTH 8 -> 10 at DEVICE_BATCH_SIZE 128"
-          },
-          {
-            "trace": "traces/nov27-swarm.jsonl",
-            "seq": 38,
-            "status": "crash",
-            "of": "lane 3 DEVICE_BATCH_SIZE 128 -> 256 at DEPTH 8"
-          }
-        ]
-      }
-    ],
+    "rules": [],
     "operators": {
       "NOTCONTAINS": "NOTCONTAINS <constant> <value>: no diff may set that value on the device",
       "NOTMORETHAN": "NOTMORETHAN <expr> <bound>: a declared product or sum of constants stays at or below a bound",
       "WITH": "<constant> <value> WITH <constant> <value>: one value is admissible only beside another"
     },
-    "after": "Cello's UCF logic_constraints and eugene_part_rules; see docs/frame-design-rules.md"
+    "after": "Cello's UCF logic_constraints and eugene_part_rules; see docs/frame-design-rules.md",
+    "example": {
+      "rule": "NOTMORETHAN DEPTH * DEVICE_BATCH_SIZE 1024",
+      "constants": [
+        "DEPTH",
+        "DEVICE_BATCH_SIZE"
+      ],
+      "reads": "the product of the two values stays at or below the bound; at DEPTH 8 the pinned DEVICE_BATCH_SIZE 128 is the limit, and DEPTH 10 is available at DEVICE_BATCH_SIZE 64",
+      "evidence": [
+        {
+          "trace": "traces/nov25.jsonl",
+          "seq": 34,
+          "status": "crash",
+          "of": "DEPTH 8 -> 10 at DEVICE_BATCH_SIZE 128"
+        },
+        {
+          "trace": "traces/nov27-swarm.jsonl",
+          "seq": 16,
+          "status": "crash",
+          "of": "lane 2 DEPTH 8 -> 10 at DEVICE_BATCH_SIZE 128"
+        },
+        {
+          "trace": "traces/nov27-swarm.jsonl",
+          "seq": 38,
+          "status": "crash",
+          "of": "lane 3 DEVICE_BATCH_SIZE 128 -> 256 at DEPTH 8"
+        }
+      ],
+      "binds": "nothing: the cited traces are illustrative and their results synthetic (systems/loop-research.md, systems/swarm-research.md), so they show the form of a rule, not a measured limit of the device"
+    }
   },
   "charter": {
     "delta_min": 0.001,

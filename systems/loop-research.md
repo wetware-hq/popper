@@ -84,7 +84,7 @@ RETURN:  if the base changed, Critic compares first base vs last base on the hol
 | 49 | data | verdict | holdout **corroborated**: all three below 1.0009, mean gain 0.0022 ≥ 0.001 |
 | 50 | frame | return | tested 3, refuted 1, corroborated 1, inconclusive 1, edge 2 bits, P2 below |
 
-The night's one advance has a margin of `0.9976 − 0.9962 = 0.0014`, so `score = 1.4 × delta_min`: the chain held, and narrowly. The holdout margin, `0.0015`, is reported apart from it. The crash at e34 is what the `library` rule on `DEPTH × DEVICE_BATCH_SIZE` cites, and P2 is the question that crash left open.
+The night's one advance has a margin of `0.9976 − 0.9962 = 0.0014`, so `score = 1.4 × delta_min`: the chain held, and narrowly. The holdout margin, `0.0015`, is reported apart from it. The crash at e34 is what the illustrative `library.example` on `DEPTH × DEVICE_BATCH_SIZE` cites, and P2 is the question that crash left open.
 
 The Conjecturer chose 2.585 + 2.322 + 2.322 ≈ 7.2 bits of diff, and the data returned 2 bits of verdict. The Recorder reports the two numbers separately.
 
