@@ -32,6 +32,7 @@ A [swarm night](systems/swarm-research.md) runs many of these loops at once, one
 | Critic | The negative loop: it tries to remove what should not survive. |
 | Recorder | The role that turns the trace into a notebook for the Steward. |
 | Prover | The formal check: Lean 4 proves properties of the rule, such as the 1-in-20 bound. It never proves a conjecture. |
+| Checker | The design-rule check, after Cello: it closes changes the GPU cannot run, checks that each kept change is tested against the levels the last one produced, and reports how narrow each margin was. It never judges. |
 | Prediction | What a change forbids, fixed before any run. |
 | Verdict | One bit: corroborated or refuted. A crash is inconclusive. |
 | Corroborated | Survived the test so far. Never "true". |
@@ -48,16 +49,16 @@ Start with [`DISCLAIMER`](DISCLAIMER) and the [repository map](docs/read-reposit
 | Path | Holds |
 |---|---|
 | `DISCLAIMER` | one-line research-use notice |
-| `docs/` | reading order, research contract, source and data pins, principles |
-| `skills/` | the Engine, the Conjecturer, the Critic and the Prover |
+| `docs/` | reading order, research contract, source and data pins, principles, design rules |
+| `skills/` | the Engine, the Conjecturer, the Critic, the Prover and the Checker |
 | `systems/loop-research.md` | the whole night, with a worked trace |
 | `systems/swarm-research.md` | many lanes in parallel, one ledger, with a worked ledger |
-| `research.json` | pins, testbed, data split, decision rule, charter defaults |
+| `research.json` | pins, testbed, data split, decision rule, host limits, charter defaults |
 | `ooc/popper.og` | the object graph |
 | `traces/` | a replayable example, not measured results |
 
-popper is a specbase, not an executable. All rules and formats are defined here. Running new experiments requires the pinned autoresearch checkout and data, one NVIDIA GPU, and `uv`. The specbase follows the form of [tulip](https://github.com/wetware-hq/tulip) and uses tulip's writing engine to generate conjectures. The engine's rules are restated in [`skills/write-conjecture.md`](skills/write-conjecture.md), and its three procedures are indexed by generality in [`docs/frame-writing-engine.md`](docs/frame-writing-engine.md), so no other specification is needed to run or replay the loop.
+popper is a specbase, not an executable. All rules and formats are defined here. Running new experiments requires the pinned autoresearch checkout and data, one NVIDIA GPU, and `uv`. The specbase follows the form of [tulip](https://github.com/wetware-hq/tulip) and uses tulip's writing engine to generate conjectures. The engine's rules are restated in [`skills/write-conjecture.md`](skills/write-conjecture.md), and its three procedures are indexed by generality in [`docs/frame-writing-engine.md`](docs/frame-writing-engine.md), so no other specification is needed to run or replay the loop. The verification layer borrows three primitives from [Cello](https://github.com/CIDARLAB/cello), the genetic-circuit compiler: the host constraint file, the check that a gate's inputs match its predecessor's outputs, and the circuit score. They are restated in [`skills/check-netlist.md`](skills/check-netlist.md) and indexed by generality in [`docs/frame-design-rules.md`](docs/frame-design-rules.md).
 
 ## Licence
 
-MIT, see [`LICENSE`](LICENSE). autoresearch and its data are cited and pinned, not vendored. The Popper texts are cited.
+MIT, see [`LICENSE`](LICENSE). autoresearch and its data, and Cello (BSD-2-Clause), are cited and pinned, not vendored. The Popper texts are cited.

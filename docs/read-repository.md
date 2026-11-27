@@ -24,6 +24,7 @@ popper is a cybernetic auto-research specbase. A Conjecturer proposes, a Critic 
 - → [vary-cybernetics.md](vary-cybernetics.md)
 - → [../systems/loop-research.md](../systems/loop-research.md)
 - → [../systems/swarm-research.md](../systems/swarm-research.md)
+- → [frame-design-rules.md](frame-design-rules.md)
 
 ## Route
 
@@ -38,6 +39,8 @@ Read `DISCLAIMER` first. The contract governs every route.
 | Propose the next hypothesis | contract → `skills/write-conjecture.md` → `skills/conjecture-hypothesis.md` |
 | Test a registered hypothesis and give its verdict | contract → `skills/refute-experiment.md` |
 | Check the decision rule with Lean 4 before a night | contract → `skills/prove-rule.md` |
+| Check a charter against what the device can run, or report a night's margin and netlist | contract → `skills/check-netlist.md` |
+| See which of Cello's design-automation primitives popper borrowed, by generality | `docs/frame-design-rules.md` |
 | Understand the feedback loops and what changes from autoresearch | `docs/vary-cybernetics.md` |
 | Check whether a source, shard or harness may be used | `docs/pin-sources.md` |
 | Audit or replay a finished trace | contract §7 → `systems/loop-research.md` §Replay |
@@ -60,6 +63,10 @@ flowchart LR
     P --> E
     C --> X[prove-rule]
     X --> E
+    C --> G[frame-design-rules]
+    G --> N[check-netlist]
+    X --> N
+    N --> L
     H --> L[loop-research]
     E --> L
     L --> S[swarm-research]

@@ -32,6 +32,27 @@
       "substitute-value"
     ]
   },
+  "design": {
+    "repo": "CIDARLAB/cello",
+    "commit": "11644045e5ab677965a8e5765db2fb8535484a53",
+    "licence": "BSD-2-Clause",
+    "role": "the design-automation source: host constraints, input-level check and circuit score; cited and pinned, not read at run time",
+    "files": {
+      "README.md": "sha256:5518452a930ac80ae8ec9ca8a874fdc31f89ec9773e9e07ea00a2664b44b2014",
+      "resources/UCF/Eco1C1G1T1.UCF.json": "sha256:55700031d764a7741251ea63ca5773fbe29bdaca25715968c87847c27837acf5",
+      "resources/eugene/majority_1_default.eug": "sha256:3bf3c583c16bf62a46c706ea63f61f2dea09afdcf27904b6e0dbec1b1f311573"
+    },
+    "generality": [
+      "library",
+      "levels",
+      "score",
+      "netlist"
+    ],
+    "declined": [
+      "logic synthesis: the Engine's hinge already offers the candidates",
+      "assignment search: keeping the best-scoring design is the hill climber popper replaces"
+    ]
+  },
   "testbed": {
     "id": "testbed:nanochat-5min",
     "edit": [
@@ -151,6 +172,81 @@
     "units": "val_bpb in 1e-6 bits per byte, exact integers",
     "when": "once per charter, before the first base run, and whenever critic or engine changes; a critic or engine change lands with the matching cell change",
     "role": "checks properties of the rule; never a conjecture or a measured result"
+  },
+  "checker": {
+    "skill": "skills/check-netlist.md",
+    "role": "check a charter against the library, check that levels propagate across advances, and report the margin and the netlist",
+    "reads": [
+      "research.json library",
+      "research.json engine",
+      "research.json swarm",
+      "a trace"
+    ],
+    "writes": [],
+    "when": "before the first base run, after each verdict, at each advance, and at RETURN",
+    "units": "margin in 1e-6 bits per byte, the Prover's units",
+    "margin": "min(b) - max(h) over the results a verdict cites; null when h is empty",
+    "score": "min margin over the probe advances of a night; the holdout margin is reported apart and never added",
+    "decides": "nothing; the Conjecturer may read the score, the Critic may not",
+    "netlist": {
+      "format": "the SBOL 2.3 data model in JSON, not SBOL RDF/XML",
+      "spec": "https://sbolstandard.org/datafiles/SBOL2.3.0.pdf",
+      "map": {
+        "ModuleDefinition": "the night: tag, problem, testbed",
+        "FunctionalComponent": "a base or arm commit with its levels",
+        "Interaction": "a verdict with kind, delta, margin and bits",
+        "participation": "base or arm, the results the verdict cites",
+        "Model": "research.json critic.test"
+      },
+      "total": "one interaction per verdict in the trace, refuted and inconclusive included"
+    },
+    "check": [
+      "R18",
+      "R19",
+      "R20"
+    ]
+  },
+  "library": {
+    "device": "the testbed's GPU (research.json testbed.hardware) at the testbed pin",
+    "role": "popper's user constraint file: what the pinned device can be asked to run, as opposed to what the Engine can write",
+    "from": "charters after nov25 and nov27: those nights are the evidence, so the rule binds the next charter on, never a trace already written",
+    "evidence": "every rule cites the result that records the failure it generalises; a rule with no such citation is invention",
+    "rules": [
+      {
+        "rule": "NOTMORETHAN DEPTH * DEVICE_BATCH_SIZE 1024",
+        "constants": [
+          "DEPTH",
+          "DEVICE_BATCH_SIZE"
+        ],
+        "reads": "the product of the two values stays at or below the bound; at DEPTH 8 the pinned DEVICE_BATCH_SIZE 128 is the limit, and DEPTH 10 is available at DEVICE_BATCH_SIZE 64",
+        "evidence": [
+          {
+            "trace": "traces/nov25.jsonl",
+            "seq": 34,
+            "status": "crash",
+            "of": "DEPTH 8 -> 10 at DEVICE_BATCH_SIZE 128"
+          },
+          {
+            "trace": "traces/nov27-swarm.jsonl",
+            "seq": 16,
+            "status": "crash",
+            "of": "lane 2 DEPTH 8 -> 10 at DEVICE_BATCH_SIZE 128"
+          },
+          {
+            "trace": "traces/nov27-swarm.jsonl",
+            "seq": 38,
+            "status": "crash",
+            "of": "lane 3 DEVICE_BATCH_SIZE 128 -> 256 at DEPTH 8"
+          }
+        ]
+      }
+    ],
+    "operators": {
+      "NOTCONTAINS": "NOTCONTAINS <constant> <value>: no diff may set that value on the device",
+      "NOTMORETHAN": "NOTMORETHAN <expr> <bound>: a declared product or sum of constants stays at or below a bound",
+      "WITH": "<constant> <value> WITH <constant> <value>: one value is admissible only beside another"
+    },
+    "after": "Cello's UCF logic_constraints and eugene_part_rules; see docs/frame-design-rules.md"
   },
   "charter": {
     "delta_min": 0.001,

@@ -5,13 +5,13 @@ updated: 2026-11-27
 domain: popper|auto-research|falsifiability|cybernetics
 scope: all
 governs: docs/follow-research-contract.md
-checksum: sha256:c394d21367529194e8ed0ee5ddf0dd6c49428cba54fa17e79f5d0c0b3e3a4fad
+checksum: sha256:1867a230653828cf7d320b18c5f4c73fccec1876c8ca1b214c9033b276ed8ac8
 ::end
 
 ::schema
 node-types: [stage, skill, system, assertion, meta]
 edge-types: [requires, precedes, composes, refuses]
-scope-levels: [all, steward, conjecturer, critic, recorder, prover]
+scope-levels: [all, steward, conjecturer, critic, recorder, prover, checker]
 ::end
 
 ::index
@@ -24,7 +24,9 @@ frame | stage | all | 1.00 | tulip@a2b9560, metaheuristics, generality-index, tr
 engine | skill | conjecturer | 1.00 | tulip-writing-engine, hinge, choice-bits, key, substitute-value, combine-lines, traverse-tale, clinamen
 conjecture | skill | conjecturer | 1.00 | type-ii, one-change, kind, delta, forbids, bold, rescues
 refute | skill | critic | 1.00 | type-i, derived-seeds, three-replicates, first-counter-instance, dominance, 1-in-20, advance
-prove | skill | prover | 1.00 | lean4@v4.36.0, kernel-check, rule-not-conjecture, stop-at-first, tighten, clamp, one-in-twenty, no-sorry
+prove | skill | prover | 1.00 | lean4@v4.36.0, kernel-check, rule-not-conjecture, stop-at-first, tighten, clamp, one-in-twenty, margin, no-sorry
+design | stage | all | 1.00 | cello@1164404, ucf, input-levels, circuit-score, sbol, generality-index, library>levels>score>netlist, synthesis-declined
+check | skill | checker | 1.00 | library, unrealizable, mismatch, margin, score=min-margin, report-only, netlist, R18-R20
 loop | system | recorder | 1.00 | charter, base, LOOP-data, notes, max-tested, holdout-once, P2, replay
 swarm | system | recorder | 1.00 | lanes, stems, slices, transfer, audit, merge, commits-1e3-1e4, utility-auc, ledger, replay
 stop | assertion | all | 1.00 | return, holdout-read, P2
@@ -44,7 +46,7 @@ Read DISCLAIMER before any node.
 
 ::node [id=contract type=stage confidence=1.00 scope=all updated=2026-11-25]
 ::dense
-steward|conjecturer|critic|recorder|verdict-bit|trace-root|closed-loop|unfalsifiable|ad-hoc|peek|unproved|R1-R17
+steward|conjecturer|critic|recorder|verdict-bit|trace-root|closed-loop|unfalsifiable|ad-hoc|peek|unproved|unrealizable|mismatch|R1-R20
 ::end
 ::full
 The research contract defines roles, events and flow laws.
@@ -54,6 +56,7 @@ The research contract defines roles, events and flow laws.
 ->[:precedes] pins
 ->[:precedes] vary
 ->[:precedes] prove
+->[:precedes] design
 ::end
 ::end
 
@@ -156,7 +159,7 @@ The Critic tests the prediction on the pinned probe.
 
 ::node [id=prove type=skill confidence=1.00 scope=prover updated=2026-11-27]
 ::dense
-lean4@611c117|core-only|units=1e-6-bpb|scan_stop|improves_corroborated|improves_tightens|simplifies_engine|clamp_in|one_in_twenty|nov25-verdicts
+lean4@611c117|core-only|units=1e-6-bpb|scan_stop|improves_corroborated|improves_tightens|simplifies_engine|clamp_in|one_in_twenty|improves_margin|nov25-verdicts
 ::end
 ::full
 The Prover has the pinned Lean 4 kernel check the rule before the base runs.
@@ -165,8 +168,40 @@ The Prover has the pinned Lean 4 kernel check the rule before the base runs.
 ->[:requires] skills/prove-rule.md
 ->[:requires] research.json
 ->[:precedes] refute
+->[:precedes] check
 ->[:refuses] unproved
 ->[:refuses] verification
+::end
+::end
+
+::node [id=design type=stage confidence=1.00 scope=all updated=2026-11-27]
+::dense
+cello@1164404|generality: 1=library|2=levels|3=score|4=netlist|synthesis=declined|assignment-search=declined
+::end
+::full
+Cello's design-automation primitives, indexed by generality and mapped onto the verification layer.
+::end
+::edges
+->[:requires] docs/frame-design-rules.md
+->[:requires] research.json
+->[:precedes] check
+::end
+::end
+
+::node [id=check type=skill confidence=1.00 scope=checker updated=2026-11-27]
+::dense
+library-before-seq1|levels-propagate|margin=min(b)-max(h)|score=min-margin|report-only|netlist=sbol2.3-json|nov25-score=1400
+::end
+::full
+The Checker checks a charter against the pinned device and reports the night's margins and netlist; it never judges.
+::end
+::edges
+->[:requires] skills/check-netlist.md
+->[:requires] research.json
+->[:precedes] loop
+->[:refuses] unrealizable
+->[:refuses] mismatch
+->[:refuses] invention
 ::end
 ::end
 
