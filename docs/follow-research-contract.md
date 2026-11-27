@@ -238,7 +238,7 @@ The Recorder writes to the Steward. A note is second person, present tense, at m
 | R16 | every `key` with `seed: "machine"` is declared by the charter and carries 0 Conjecturer bits |
 | R17 | the `skills/prove-rule.md` cell checks under `research.json` `prover` before the first base run, with no forbidden token and only the pinned axioms |
 | R18 | after every advance, the next probe verdict's base results are exactly the advanced arm's results |
-| R19 | every option the charter can offer is realizable under `research.json` `library`, and every library rule cites the result that evidences it |
+| R19 | every configuration the charter can reach, on the first base or after any advance, is realizable under `research.json` `library`, and every library rule cites the result that evidences it |
 | R20 | projecting the trace to a netlist (`research.json` `checker.netlist`) gives one interaction per verdict, refuted and inconclusive included, from which every margin and the night's score recompute |
 
 ## Citations

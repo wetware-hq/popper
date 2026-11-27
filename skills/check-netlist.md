@@ -56,7 +56,7 @@ At the pin the rule list is empty. The worked traces are illustrative and their 
 
 ## Procedure
 
-1. **Before the night.** Enumerate the options the chartered skill can offer on the base, as `skills/write-conjecture.md` does, and the stems of a swarm charter. Any option whose value violates a rule is `unrealizable`: the Steward narrows the slice, amends the lexicon or lifts the rule with new evidence before seq 1. The Checker never silently drops an option, because an option it dropped would change every later hinge size and bits, and the trace would no longer replay.
+1. **Before the night.** Enumerate every configuration the charter can reach, not only the options the first base offers: for each rule, every combination of its constants over the base values and every value the lexicon or slice holds, since an advance moves the base and the hinge then offers values the first base could not (`skills/write-conjecture.md`). Do the same for the stems of a swarm charter. Any reachable configuration that violates a rule is `unrealizable`: the Steward narrows the slice, amends the lexicon or lifts the rule with new evidence before seq 1. The Checker never silently drops an option, because an option it dropped would change every later hinge size and bits, and the trace would no longer replay.
 2. **While the night runs.** Nothing. The Checker does not read a pending arm.
 3. **After each verdict.** Compute `margin`. The Recorder may state it in the note as the gap between the worst arm run and the best base run.
 4. **At each advance.** Check that the next verdict's `b` is exactly the arm's `h` (`mismatch`). This is Cello's input-level check: a chain whose levels are refitted between gates measures nothing, and here it would mean a conjecture was tested against results its base never produced.
@@ -140,8 +140,15 @@ for (const rule of [...config.library.rules, config.library.example]) {
     assert.equal(cited.seq, seq);
     assert(cited.body.status === status || cited.body.h?.includes(status), "invention");
   }
-  assert(rule.constants.some(c => !(c in config.engine.lexicons)), "unrealizable");
 }
+
+// R19: closure is over every configuration the lexicons can reach, not the first base's options.
+// Applied to the worked night, the example closes DEPTH 10 and 12 at the source's DEVICE_BATCH_SIZE 128,
+// so a charter bound by it would have to drop them from the lexicon before seq 1.
+const reach = c => config.engine.lexicons[c] ?? { DEVICE_BATCH_SIZE: [128] }[c];
+const [x, y] = config.library.example.constants;
+const closed = reach(x).flatMap(a => reach(y).map(b => [a, b])).filter(([a, b]) => a * b > 1024);
+assert.deepEqual(closed, [[10, 128], [12, 128]], "unrealizable");
 
 console.log(`Netlist: ${netlist.interactions.length} interactions, score ${score / level(config.charter.delta_min)} delta_min`);
 ```
