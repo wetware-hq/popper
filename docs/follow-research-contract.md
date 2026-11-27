@@ -14,7 +14,7 @@ popper researches at the edge between two worlds. In the theory world a machine 
   "reads": ["DISCLAIMER", "research.json", "ooc/popper.og"],
   "writes": [],
   "must": ["every advance passes through the data", "predict before running", "the Critic alone runs and judges", "only the Steward charters", "corroborated is never true", "the holdout is read once", "append only", "match codes, not prose"],
-  "check": ["R1-R16"]
+  "check": ["R1-R17"]
 }
 ```
 
@@ -33,7 +33,8 @@ popper researches at the edge between two worlds. In the theory world a machine 
 ```toml { type: notebook.cell }
 config = "research.json"                 # source pin, testbed, data, critic rule, charter defaults
 index = "ooc/popper.og"                  # optional local file map
-skills = ["skills/write-conjecture.md", "skills/conjecture-hypothesis.md", "skills/refute-experiment.md"]
+skills = ["skills/write-conjecture.md", "skills/conjecture-hypothesis.md", "skills/refute-experiment.md", "skills/prove-rule.md"]
+prover = "research.json prover"             # Lean 4 toolchain pin; the kernel checks the rule before the base runs
 engine = "research.json engine"             # tulip's writing engine: lexicons and offsets that generate every diff
 framework = "docs/frame-writing-engine.md"  # tulip's metaheuristics indexed by generality; pinned in research.json framework
 system = "systems/loop-research.md"      # LOOP(data) { POSITIVE hypothesis; NEGATIVE experiments; } RETURN
@@ -51,7 +52,7 @@ store = "one trace per charter"          # JSON Lines, append only, root-chained
 ## Contraindications
 
 - Not a hill climber. A change is never kept because one run came out lower (§4.3, `self_verdict`).
-- Not a verifier. Nothing in popper is ever called true, proven, confirmed or verified (`verification`).
+- Not a verifier. Nothing in popper is ever called true, proven, confirmed or verified (`verification`). The Prover checks theorems about the rule in Lean 4, never about a conjecture or a result; a passing check is "checked by Lean" (`skills/prove-rule.md`).
 - Not a closed loop without a check. The base never advances twice without a corroborated verdict between (§4.1, `closed_loop`).
 - Not a way to move the goalposts. The evaluator, the data split, the seed protocol and the decision rule are fixed by the charter and the pins; a conjecture may not touch them (`drift`, `confound`, `ad_hoc`).
 - Not unattended forever. The source's loop never stops; popper's loop returns at the charter's budget or when the Steward stops it (§4.9).
@@ -65,8 +66,9 @@ store = "one trace per charter"          # JSON Lines, append only, root-chained
 | **Engine** | machine | offers a hinge of generated diffs on the base, derives the key from the Conjecturer's pick, writes the diff (tulip's writing engine, `skills/write-conjecture.md`) | chooses, samples, writes a diff no key explains |
 | **Critic** | data (negative) | runs the registered test exactly: seeds, replicates, rule; emits the verdict (Type I) | reads the rationale, chooses which runs count, reruns a refuted arm |
 | **Recorder** | frame | writes notebook entries to the Steward from the trace | invents an event, calls a conjecture true |
+| **Prover** | formal | has the pinned Lean 4 kernel check the rule's theorems before the base runs (`skills/prove-rule.md`) | states a theorem about a conjecture or a measured result, writes a trace event, admits `sorry` or a new axiom |
 
-The roles are defined in `skills/write-conjecture.md`, `skills/conjecture-hypothesis.md`, `skills/refute-experiment.md` and `systems/loop-research.md`. Their read and write boundaries apply even if a single runner performs them. Only the human Steward writes, amends or stops a charter (`self_charter`). The pinned `prepare.py` supplies the evaluator, `evaluate_bpb`.
+The roles are defined in `skills/write-conjecture.md`, `skills/conjecture-hypothesis.md`, `skills/refute-experiment.md`, `skills/prove-rule.md` and `systems/loop-research.md`. Their read and write boundaries apply even if a single runner performs them. Only the human Steward writes, amends or stops a charter (`self_charter`). The pinned `prepare.py` supplies the evaluator, `evaluate_bpb`.
 
 The code blocks marked `notebook.cell` are examples or declarations in ordinary Markdown; the mark has no execution semantics. The optional `ooc/popper.og` index uses `::name` and `::end` to delimit sections; its typed nodes and arrows index local files or node IDs. Its checksum is the SHA-256 of the file bytes with the entire `checksum:` line removed.
 
@@ -175,6 +177,7 @@ Refusals use codes, not message text. Use the first failing code in table order.
 |---|---|
 | `unpinned` | the source, a data shard or the holdout harness has no pin in `research.json` |
 | `drift` | pinned bytes do not hash to `digest`, or a replay gives different verdicts |
+| `unproved` | the `skills/prove-rule.md` cell fails under the pinned Lean, uses a forbidden token, or depends on an axiom outside `research.json` `prover.axioms` |
 | `self_charter` | a `charter`, `amend` or `stop` event came from anyone but the Steward |
 | `out_of_scope` | a diff touches a file outside `testbed.edit`, or adds a dependency |
 | `confound` | a diff touches the seed lines, `TIME_BUDGET`, `MAX_SEQ_LEN`, `EVAL_TOKENS` or the evaluation call |
@@ -225,6 +228,7 @@ The Recorder writes to the Steward. A note is second person, present tense, at m
 | R14 | every conjecture's diff equals `engine(constraint, key)`, and its key cites a choice of an offered option, or, with `seed: "machine"`, its hinge |
 | R15 | every `choice.bits` equals `log2` of the distinct diffs offered at its hinge, and no refuted diff is offered |
 | R16 | every `key` with `seed: "machine"` is declared by the charter and carries 0 Conjecturer bits |
+| R17 | the `skills/prove-rule.md` cell checks under `research.json` `prover` before the first base run, with no forbidden token and only the pinned axioms |
 
 ## Citations
 
@@ -241,6 +245,7 @@ The Recorder writes to the Steward. A note is second person, present tense, at m
 | [Cybernetics (Wiener, 1948)](https://en.wikipedia.org/wiki/Cybernetics:_Or_Control_and_Communication_in_the_Animal_and_the_Machine) | deviation-counteracting (negative) feedback |
 | [Permutation test](https://en.wikipedia.org/wiki/Permutation_test) | the 1/20 bound in §3 |
 | [RFC 8785](https://www.rfc-editor.org/rfc/rfc8785) | JCS for `ehash` |
+| [Lean 4 `v4.36.0` `611c117`](https://github.com/leanprover/lean4/commit/611c117bfaf7b7ae1cfcf246ce6fba31e8f509e9), [docs](https://lean-lang.org/doc) | the Prover's kernel (`skills/prove-rule.md`, R17) |
 
 ## Falsification
 
@@ -259,6 +264,7 @@ Actively try to break the loop. Each row must fail with its code.
 | Evaluate on shard 06541 halfway through the night | `peek` |
 | Note says "depth 9 is the better model" | `verification` |
 | Delete a refuted conjecture from the trace | `broken_chain` |
+| Start the base runs with a `sorry` in the Prover cell | `unproved` |
 
 ## Licence
 

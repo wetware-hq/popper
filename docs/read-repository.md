@@ -37,6 +37,7 @@ Read `DISCLAIMER` first. The contract governs every route.
 | Choose which tulip procedure to charter, by generality | `docs/frame-writing-engine.md` |
 | Propose the next hypothesis | contract → `skills/write-conjecture.md` → `skills/conjecture-hypothesis.md` |
 | Test a registered hypothesis and give its verdict | contract → `skills/refute-experiment.md` |
+| Check the decision rule with Lean 4 before a night | contract → `skills/prove-rule.md` |
 | Understand the feedback loops and what changes from autoresearch | `docs/vary-cybernetics.md` |
 | Check whether a source, shard or harness may be used | `docs/pin-sources.md` |
 | Audit or replay a finished trace | contract §7 → `systems/loop-research.md` §Replay |
@@ -57,6 +58,8 @@ flowchart LR
     W --> H[conjecture-hypothesis]
     V --> E[refute-experiment]
     P --> E
+    C --> X[prove-rule]
+    X --> E
     H --> L[loop-research]
     E --> L
     L --> S[swarm-research]

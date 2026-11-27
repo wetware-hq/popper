@@ -11,10 +11,10 @@ This is one research night, from the Steward's charter to the holdout. It compos
   "id": "systems/loop-research.md",
   "type": "system",
   "role": "run a charter to RETURN: base, then conjecture and refutation until the budget, then the holdout once",
-  "reads": ["research.json", "charter", "skills/write-conjecture.md", "skills/conjecture-hypothesis.md", "skills/refute-experiment.md"],
+  "reads": ["research.json", "charter", "skills/write-conjecture.md", "skills/conjecture-hypothesis.md", "skills/refute-experiment.md", "skills/prove-rule.md"],
   "writes": ["trace", "results.tsv", "notebook"],
   "must": ["start from a Steward charter", "replicate the base first", "one conjecture under test at a time", "a note after every probe verdict", "stop at max_tested or Steward stop", "compare on the holdout only at RETURN if the base changed", "return P2"],
-  "check": ["R1-R16"]
+  "check": ["R1-R17"]
 }
 ```
 
@@ -24,12 +24,14 @@ This is one research night, from the Steward's charter to the holdout. It compos
 - ← [../skills/write-conjecture.md](../skills/write-conjecture.md)
 - ← [../skills/conjecture-hypothesis.md](../skills/conjecture-hypothesis.md)
 - ← [../skills/refute-experiment.md](../skills/refute-experiment.md)
+- ← [../skills/prove-rule.md](../skills/prove-rule.md)
 
 ## Procedure
 
 ```text { type: notebook.cell }
 charter := Steward                                   # P1
 setup:   prepare the pinned checkout and cache (docs/pin-sources.md)
+         Prover checks the rule with the pinned Lean 4 (skills/prove-rule.md); unproved → no base run
          create popper/<tag> at source.commit; append the charter as seq 1
 base:    Critic runs the base three times → b      # seeds from the root after the charter
 LOOP(data) {

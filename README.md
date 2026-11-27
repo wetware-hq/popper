@@ -12,7 +12,7 @@ LOOP(data) {
 
 ## How a night runs
 
-1. **You write the charter.** You set the problem, the smallest gain worth keeping, and how many ideas to test. Then you can go to sleep.
+1. **You write the charter.** You set the problem, the smallest gain worth keeping, and how many ideas to test. The Prover has Lean 4 check the decision rule before any run. Then you can go to sleep.
 2. **The Engine offers, the Conjecturer picks.** The Engine uses tulip's writing engine to generate a set of possible changes to `train.py`: each one shifts a hyperparameter up or down its pinned list of values. The Conjecturer reads everything tried so far, including every refutation, and picks one. The Engine writes the diff. The Conjecturer then states what result would refute it.
 3. **The Critic tries to refute it.** It trains the change up to three times, using seeds derived from the trace. For an improvement, it stops when a run fails to beat the best base run.
 4. **The data decides.** An improvement becomes the new base only if all three runs beat all three base runs and the mean gain meets the prediction. A simplification must remove more lines than it adds and stay within the allowed mean loss. Every verdict stays in the trace.
@@ -31,6 +31,7 @@ A [swarm night](systems/swarm-research.md) runs many of these loops at once, one
 | Conjecturer | The positive loop: it picks what to try, building on what has survived. |
 | Critic | The negative loop: it tries to remove what should not survive. |
 | Recorder | The role that turns the trace into a notebook for the Steward. |
+| Prover | The formal check: Lean 4 proves properties of the rule, such as the 1-in-20 bound. It never proves a conjecture. |
 | Prediction | What a change forbids, fixed before any run. |
 | Verdict | One bit: corroborated or refuted. A crash is inconclusive. |
 | Corroborated | Survived the test so far. Never "true". |
@@ -48,7 +49,7 @@ Start with [`DISCLAIMER`](DISCLAIMER) and the [repository map](docs/read-reposit
 |---|---|
 | `DISCLAIMER` | one-line research-use notice |
 | `docs/` | reading order, research contract, source and data pins, principles |
-| `skills/` | the Engine, the Conjecturer and the Critic |
+| `skills/` | the Engine, the Conjecturer, the Critic and the Prover |
 | `systems/loop-research.md` | the whole night, with a worked trace |
 | `systems/swarm-research.md` | many lanes in parallel, one ledger, with a worked ledger |
 | `research.json` | pins, testbed, data split, decision rule, charter defaults |

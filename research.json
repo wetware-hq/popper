@@ -126,6 +126,32 @@
     "ties": "for improves, h_i = min(b) refutes",
     "crash": "inconclusive; a missing or non-finite val_bpb is a crash"
   },
+  "prover": {
+    "language": "Lean 4",
+    "toolchain": "leanprover/lean4:v4.36.0",
+    "commit": "611c117bfaf7b7ae1cfcf246ce6fba31e8f509e9",
+    "docs": "https://lean-lang.org/doc",
+    "cell": "skills/prove-rule.md",
+    "extract": "awk '/^```lean( |$)/{f=1;next}/^```/{f=0}f' skills/prove-rule.md > Popper.lean",
+    "run": "lean Popper.lean",
+    "imports": [],
+    "forbidden": [
+      "sorry",
+      "admit",
+      "axiom ",
+      "native_decide",
+      "implemented_by",
+      "extern"
+    ],
+    "axioms": [
+      "propext",
+      "Quot.sound",
+      "Classical.choice"
+    ],
+    "units": "val_bpb in 1e-6 bits per byte, exact integers",
+    "when": "once per charter, before the first base run, and whenever critic or engine changes",
+    "role": "checks properties of the rule; never a conjecture or a measured result"
+  },
   "charter": {
     "delta_min": 0.001,
     "max_tested": 100,
