@@ -149,7 +149,7 @@
       "Classical.choice"
     ],
     "units": "val_bpb in 1e-6 bits per byte, exact integers",
-    "when": "once per charter, before the first base run, and whenever critic or engine changes; a critic or engine change lands with the matching cell change",
+    "when": "once per charter, before the first base run, and whenever critic or engine changes; a change to critic.test, critic.crash or critic.replicates lands with the matching cell change",
     "role": "checks properties of the rule; never a conjecture or a measured result"
   },
   "charter": {
