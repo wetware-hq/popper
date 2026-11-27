@@ -69,9 +69,9 @@ The netlist is the night as an exchange document, in the object names of [SBOL 2
 | SBOL | popper |
 |---|---|
 | `ModuleDefinition` | the night: tag, problem, testbed and charter |
-| `FunctionalComponent` | a base or arm commit, with its three levels |
+| `FunctionalComponent` | a base or arm commit |
 | `Interaction` | a verdict, with `kind`, `delta`, `margin` and `bits` |
-| `participation` with role `base` or `arm` | the results the verdict cites |
+| `participation` with role `base` or `arm` | the levels of the results the verdict cites, per verdict, so a commit tested on both shards keeps its probe and holdout levels apart |
 | `Model` | `research.json` `critic.test`, the function that produced every verdict |
 
 The projection is total: every verdict in the trace appears, refuted ones included, so a netlist cannot show only what survived. Given the netlist and `research.json`, a reader recomputes every verdict, every margin and the score without reading any prose in this repository, which is the only sense in which popper claims to speak the language.
@@ -93,10 +93,7 @@ const netlist = { module: {}, components: {}, interactions: [] };
 for (const event of events.slice(1)) {
   const { seq, kind, body, cites } = event;
   if (kind === "charter") netlist.module = { tag: body.tag, problem: body.problem, testbed: body.testbed };
-  if (kind === "run") (netlist.components[body.commit] ??= { levels: [] });
-  if (kind === "result" && body.status === "ok") {
-    netlist.components[events[body.run].body.commit].levels.push(level(body.val_bpb));
-  }
+  if (kind === "run") netlist.components[body.commit] ??= {};
   if (kind !== "verdict") continue;
   const conjecture = events[body.conjecture].body;
   netlist.interactions.push({
@@ -104,12 +101,16 @@ for (const event of events.slice(1)) {
     kind: conjecture.prediction.kind, delta: level(body.holdout ? config.charter.holdout_delta : conjecture.prediction.delta),
     base: conjecture.base, arm: cites.map(id => events[id]).filter(e => e.kind === "result")
       .map(e => events[e.body.run].body.commit).find(c => c !== conjecture.base) ?? null,
+    participation: { base: body.b.map(level), arm: body.h.map(level) },
     margin: body.h.length ? margin(body) : null,
   });
 }
 
-// Every verdict is projected, refutations included.
+// Every verdict is projected, refutations included, and its margin recomputes from the netlist alone.
 assert.equal(netlist.interactions.length, events.filter(e => e && e.kind === "verdict").length);
+for (const { participation: p, margin: m } of netlist.interactions) {
+  assert.equal(m, p.arm.length ? Math.min(...p.base) - Math.max(...p.arm) : null);
+}
 
 // R18: after an advance, the next verdict's base levels are the arm's own results.
 for (const event of events.slice(1)) {

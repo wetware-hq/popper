@@ -193,9 +193,9 @@
       "spec": "https://sbolstandard.org/datafiles/SBOL2.3.0.pdf",
       "map": {
         "ModuleDefinition": "the night: tag, problem, testbed",
-        "FunctionalComponent": "a base or arm commit with its levels",
+        "FunctionalComponent": "a base or arm commit",
         "Interaction": "a verdict with kind, delta, margin and bits",
-        "participation": "base or arm, the results the verdict cites",
+        "participation": "base or arm: the levels of the results the verdict cites, kept per verdict so probe and holdout levels of one commit never pool",
         "Model": "research.json critic.test"
       },
       "total": "one interaction per verdict in the trace, refuted and inconclusive included"
